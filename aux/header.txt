@@ -1,0 +1,31 @@
+about::About
+links::Links
+apev::APEV service
+ch::Coronal holes database
+coho::COHO project
+coronasf::Coronas-F
+coronasi::Coronas-I
+coronas-pics::Particle distribution images (based on data from Coronas-F)
+cosmos1686::Cosmos-1686
+doc::Documentation
+flares::Solar flares
+main::Home
+meteor::Meteor-3M
+model-ap8ae8::AP8/AE8 model
+model-cosrad::COSRAD model
+model-igrf::IGRF10 model
+model-para::Paraboloid model of the Earth's magnetosphere
+model-shieldose2::ShielDose2 model
+mpause::Magnetopause crossings
+neutronflux::Thermal neutron flux project
+omni::OMNIweb mirror
+photon::Coronas-Photon
+plan::Development plan (ru)
+prognos9::Prognos-9
+ryabina::Scientific experiments on MIR station
+services::Scientific services
+spatial-pics::Spatial distributions of particles (based on data from Coronas-F and Universitetsky-Tatyana)
+storms::Magnetic storms directory
+tat2::Tatyana-2
+tatyana::Universitetsky-Tatyana
+uv-flashes::Ultraviolet flashes

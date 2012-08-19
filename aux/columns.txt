@@ -1,0 +1,303 @@
+pf1_45::E<sub>p</sub> 1-4.5 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pf45_65::E<sub>p</sub> 4.5-65 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pf12_05::E<sub>p</sub> 12-65 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pf30_65::E<sub>p</sub> 30-65 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pf05_150::E<sub>p</sub> 65-150 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pf150_300::E<sub>p</sub> 150-300 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+e2p30::E<sub>p</sub>&gt;30 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+e50p80::E<sub>p</sub>&gt;80 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ef05_13::E<sub>e</sub> 0.5-1.3 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ef05_15::E<sub>e</sub> 0.5-1.5 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ef15_27::E<sub>e</sub> 1.5-2.7 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ef27_6::E<sub>e</sub> 2.7-6 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ef6_12::E<sub>e</sub> 6-12 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+p91x0d01_0d05::E<sub>e</sub> 10-50 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::linear::10::40
+p91x0d025_0d05::E<sub>e</sub> 25-50 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::linear::12::30
+p91flag::Flag::flag::linear::0::1
+p92x0d01_0d05::E<sub>e</sub> 10-50 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::linear::24::36
+p92x0d025_0d05::E<sub>e</sub> 25-50 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::linear::12::24
+p91x0d1_0d2::E<sub>e</sub> 100-200 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::linear::6::18
+p91x0d05_0d1::E<sub>e</sub> 50-100 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::linear::16::28
+p91shield::Shield::shield::linear::400::550
+eglat::Latitude::&Phi;<sup>o</sup>::linear::-90::90
+eglon::Longitude::&lambda;<sup>o</sup>::linear::0::360
+eheight::Spacecraft altitude::H, km::linear::990::1050
+pglat::Latitude::&Phi;<sup>o</sup>::linear::-90::90
+pglon::Longitude::&lambda;<sup>o</sup>::linear::0::360
+pheight::Spacecraft altitude::H, km::linear::990::1050
+lat::Latitude::&Phi;<sup>o</sup>::linear::-90::90
+longi::Longitude::&lambda;<sup>o</sup>::linear::-180::180
+lng::Longitude::&lambda;<sup>o</sup>::linear::-180::180
+lon::Longitude::&lambda;<sup>o</sup>::linear::-180::360
+alt::Spacecraft altitude::H, km::linear::0::600
+height::Spacecraft altitude::H, km::linear::990::1050
+h::Spacecraft altitude::H, km::linear::0::1200
+alu::Spacecraft altitude::H, km::linear::0::600
+bcoord::Geomagnetic field::B, nT::linear::0.0::0.6
+lcoord::McIlwain parameter::L, R<sub>E</sub>::log
+b::Geomagnetic field::B, nT::linear::0::60000
+l::McIlwain parameter::L, R<sub>E</sub>::log
+eb::Geomagnetic field::B, nT::linear::0::45000
+el::McIlwain parameter::L, R<sub>E</sub>::log
+pb::Geomagnetic field::B, nT::linear::0::45000
+pl::McIlwain parameter::L, R<sub>E</sub>::log
+i1p20_80::E<sub>p</sub> 0.2-8 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+i1p09_8::E<sub>p</sub> 0.9-8 MeV I::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+i2p09_8::E<sub>p</sub> 0.9-8 MeV II::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+i2p20_8::E<sub>p</sub> 2-8 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+i1p30_20::E<sub>p</sub>&gt;30 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+i1e03_06::E<sub>e</sub> 0.3-0.6 MeV I::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+i1e06_09::E<sub>e</sub> 0.6-0.9 MeV I::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+i1e09_12::E<sub>e</sub> 0.9-1.2 MeV I::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+i1e12_20::E<sub>e</sub> 1.2-2 MeV I::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+i1e40_05::E<sub>e</sub>&gt;40 keV I::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+i1e01_2::E<sub>e</sub>&gt;0.1 MeV I::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+i1e40_05::E<sub>e</sub>&gt;0.5 MeV I::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+i2e03_06::E<sub>e</sub> 0.3-0.6 MeV II::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+i2e06_09::E<sub>e</sub> 0.6-0.9 MeV II::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+i2e09_12::E<sub>e</sub> 0.9-1.2 MeV II::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+i2e12_20::E<sub>e</sub> 1.2-2 MeV II::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+i2e40_05::E<sub>e</sub>&gt; 40 keV II::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+i2e01_2::E<sub>e</sub>&gt; 0.1 MeV II::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+i2e40_05::E<sub>e</sub>&gt; 0.5 MeV II::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ed01::E<sub>e</sub>&gt; 0.1 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ed05::E<sub>e</sub>&gt; 0.5 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ed5pf60::E<sub>p</sub>&gt; 60 MeV<br/> E<sub>e</sub>&gt; 5 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+p15::E<sub>p</sub> 1-5 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+p142::E<sub>p</sub> 2-14 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+p265::E<sub>p</sub> 26-50 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+p509::E<sub>p</sub> 50-90 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+e615::E<sub>e</sub> 0.6-1.5 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+e153::E<sub>e</sub> 1.5-3 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+e36::E<sub>e</sub> 3-6 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+e612::E<sub>e</sub> 6-12 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+e1623::E<sub>e</sub> &gt;1.6 MeV; E<sub>p</sub> &gt;23 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+e1690::E<sub>e</sub> &gt;1.6 MeV; E<sub>p</sub> &gt;90 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+x05015::X-rays 50-150 keV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+x1505::X-rays, 150-500 keV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+g513::Gamma 0.5-1.3 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+g47::Gamma 4-7 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+g715::Gamma 7-15 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+g60100::Gamma 60-100 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+p5090::E<sub>p</sub> 50-90 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+p200300::E<sub>p</sub> 200-300 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+e306::E<sub>e</sub> 0.3-0.6 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+e0519::E<sub>e</sub> 0.5-1.9 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+bx_gsm::IMF B<sub>x</sub>::B<sub>x</sub>, nT::linear::-50::40
+by_gsm::IMF B<sub>y</sub>::B<sub>y</sub>, nT::linear::-50::40
+bz_gsm::IMF B<sub>z</sub>::B<sub>z</sub>, nT::linear::-70::50
+n::N::N::linear::0::90
+v::V::V, km/s::linear::200::1300
+dst::Dst::Dst, nT::linear::-600::300
+-al::AL::AL, nT::linear::-2400::0
+ec14::E<sub>e</sub> 0.115 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec15::E<sub>e</sub> 0.121 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec16::E<sub>e</sub> 0.127 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec17::E<sub>e</sub> 0.133 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec18::E<sub>e</sub> 0.141 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec19::E<sub>e</sub> 0.148 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec20::E<sub>e</sub> 0.157 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec21::E<sub>e</sub> 0.166 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec22::E<sub>e</sub> 0.177 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec23::E<sub>e</sub> 0.189 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec24::E<sub>e</sub> 0.202 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec25::E<sub>e</sub> 0.216 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec26::E<sub>e</sub> 0.231 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec27::E<sub>e</sub> 0.249 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec28::E<sub>e</sub> 0.267 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec29::E<sub>e</sub> 0.288 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec30::E<sub>e</sub> 0.312 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec31::E<sub>e</sub> 0.338 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec32::E<sub>e</sub> 0.368 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec33::E<sub>e</sub> 0.400 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec34::E<sub>e</sub> 0.438 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec35::E<sub>e</sub> 0.481 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec36::E<sub>e</sub> 0.528 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec37::E<sub>e</sub> 0.583 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec38::E<sub>e</sub> 0.642 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec39::E<sub>e</sub> 0.710 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec40::E<sub>e</sub> 0.792 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec41::E<sub>e</sub> 0.884 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec42::E<sub>e</sub> 0.989 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec43::E<sub>e</sub> 1.107 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec44::E<sub>e</sub> 1.245 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec45::E<sub>e</sub> 1.406 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec46::E<sub>e</sub> 1.588 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec47::E<sub>e</sub> 1.794 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec48::E<sub>e</sub> 2.028 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec49::E<sub>e</sub> 2.298 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec50::E<sub>e</sub> 2.609 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec51::E<sub>e</sub> 2.957 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec52::E<sub>e</sub> 3.350 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec53::E<sub>e</sub> 3.796 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec54::E<sub>e</sub> 4.305 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec55::E<sub>e</sub> 4.881 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec56::E<sub>e</sub> 5.516 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec57::E<sub>e</sub> 6.230 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec58::E<sub>e</sub> 7.037 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec59::E<sub>e</sub> 7.937 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec60::E<sub>e</sub> 8.935 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec61::E<sub>e</sub> 10.022 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec62::E<sub>e</sub> 11.092 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+ec63::E<sub>e</sub> 11.670 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc14::E<sub>p</sub> 0.115 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc15::E<sub>p</sub> 0.121 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc16::E<sub>p</sub> 0.127 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc17::E<sub>p</sub> 0.133 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc18::E<sub>p</sub> 0.141 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc19::E<sub>p</sub> 0.148 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc20::E<sub>p</sub> 0.157 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc21::E<sub>p</sub> 0.166 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc22::E<sub>p</sub> 0.177 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc23::E<sub>p</sub> 0.189 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc24::E<sub>p</sub> 0.202 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc25::E<sub>p</sub> 0.216 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc26::E<sub>p</sub> 0.231 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc27::E<sub>p</sub> 0.249 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc28::E<sub>p</sub> 0.267 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc29::E<sub>p</sub> 0.288 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc30::E<sub>p</sub> 0.312 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc31::E<sub>p</sub> 0.338 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc32::E<sub>p</sub> 0.368 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc33::E<sub>p</sub> 0.400 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc34::E<sub>p</sub> 0.438 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc35::E<sub>p</sub> 0.481 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc36::E<sub>p</sub> 0.528 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc37::E<sub>p</sub> 0.583 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc38::E<sub>p</sub> 0.642 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc39::E<sub>p</sub> 0.710 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc40::E<sub>p</sub> 0.792 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc41::E<sub>p</sub> 0.884 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc42::E<sub>p</sub> 0.989 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc43::E<sub>p</sub> 1.107 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc44::E<sub>p</sub> 1.245 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc45::E<sub>p</sub> 1.406 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc46::E<sub>p</sub> 1.588 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc47::E<sub>p</sub> 1.794 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc48::E<sub>p</sub> 2.028 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc49::E<sub>p</sub> 2.298 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc50::E<sub>p</sub> 2.609 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc51::E<sub>p</sub> 2.957 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc52::E<sub>p</sub> 3.350 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc53::E<sub>p</sub> 3.796 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc54::E<sub>p</sub> 4.305 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc55::E<sub>p</sub> 4.881 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc56::E<sub>p</sub> 5.516 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc57::E<sub>p</sub> 6.230 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc58::E<sub>p</sub> 7.037 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc59::E<sub>p</sub> 7.937 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc60::E<sub>p</sub> 8.935 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc61::E<sub>p</sub> 10.022 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc62::E<sub>p</sub> 11.092 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pc63::E<sub>p</sub> 11.670 KeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pflux01::E<sub>p</sub>&gt;1 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pflux02::E<sub>p</sub>&gt;2 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pflux04::E<sub>p</sub>&gt;4 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pflux10::E<sub>p</sub>&gt;10 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pflux30::E<sub>p</sub>&gt;30 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+pflux60::E<sub>p</sub>&gt;60 MeV::(cm<sup>2</sup>*sec*sr)<sup>-1</sup>::log
+emlt::Magnetic local time::MLT, hours::linear::0::24
+mlt::Magnetic local time::MLT, hours::linear::0::24
+lt::Local time::LT, hours::linear::0::24
+eilat::Invariant latitude::ILAT, degrees::linear::-90::90
+ilat::Invariant latitude::ILAT, degrees::linear::-90::90
+mlat::Magnetic latitude::MLAT, degrees::linear::-90::90
+elat_m::Magnetic latitude::LAT_M, degrees::linear::-90::90
+pmlt::Magnetic local time::MLT, hours::linear::0::24
+pilat::Invariant latitude::ILAT, degrees::linear::-90::90
+plat_m::Magnetic latitude::LAT_M, degrees::linear::-90::90
+hedist::Spacecraft heliocentric distance::H, AU::linear::0::60
+helon::Heliographic inertial longitude::HELON, degrees::linear::-9::9
+helat::Heliographic inertial latitude::HELAT, degrees::linear::-180::360
+rb::Magnetic longitude::MLON, degrees::linear::0::360
+mlon::Magnetic longitude::mlon, degrees::linear::-180::180
+e70::E<sub>e</sub>&gt;=70keV and E<sub>p</sub>&gt;0.8MeV::I, Hz::log
+p2::E<sub>p</sub>=2-14MeV::I, Hz::log
+e3::E<sub>e</sub>=0.3-0.6MeV::I, Hz::log
+p7::E<sub>p</sub>=7-16MeV::I, Hz::log
+e7::E<sub>e</sub>=0.7-0.9MeV and E<sub>p</sub>&gt;7MeV::I, Hz::log
+p14::E<sub>p</sub>=15-40MeV::I, Hz::log
+p40100::E<sub>p</sub>=40-100MeV::I, Hz::log
+tempmax::Plasma max.temperature::T<sub>max</sub>, K::linear::0::1200000
+tempmin::Plasma min.temperature::T<sub>min</sub>, K::linear::0::1200000
+radpt::Radial component of proton temperature::T, K::linear::0::6000000
+temper::Radial component of proton temperature::T, K::linear::0::600000
+tplasm::Plasma temperature::T, K::linear::0::15000000
+sigmt::Plasma temperature standard deviation::&sigma;T, K::linear::0::90000000
+cr::Sensor data as countrate::I, Hz::log
+carr::Carrington rotation number::N::linear::1500::1800
+flag::Flag::F::linear::1::7
+r::Number of sunspots::R::linear::0::300
+flag1::Flux flag::F::linear::-1::8
+bart::Bartels rotation number::B::linear::1700::2300
+idscimf::IMF source ID::Id::linear::0::90
+idscsw::SW plasma source ID::Id::linear::0::120
+navrimf::Number of points in IMF averages::N::linear::0::1800
+navrsw::Number of points in plasma averages::N::linear::0::300
+kp::Planetary geomagnetic activity index::Kp::linear::0::90
+c9::Geomagnetic activity index::C9::linear::0::9
+dist::Geocentric distance from the crossing::D, R<sub>E</sub>::linear::0::60
+scsep::Earth-Sun-source separation angle::&alpha;<sup>o</sup>::log
+lonv::Plasma flow long.angle::&Phi;<sup>o</sup>::linear::-90::90
+latv::Plasma flow lat.angle::&lambda;<sup>o</sup>::linear::-90::90
+pelrtn::Plasma flow velocity vector elevation angle::E<sup>o</sup>::linear::-90::90
+pazrtn::Plasma flow velocity vector azimuth angle::A<sup>o</sup>::linear::-90::90
+sigmfv::Plasma flow long.angle standard deviation::&sigma;&Phi;<sup>o</sup>::linear::0::60
+sigmtv::Plasma flow lat.angle standard deviation::&sigma;&lambda;<sup>o</sup>::linear::0::120
+brrtn::BR in RTN coordinate system::B<sub>R</sub>, nT::log
+btrtn::BT in RTN coordinate system::B<sub>T</sub>, nT::log
+bnrtn::BN in RTN coordinate system::B<sub>N</sub>, nT::log
+bxsse::BX in SSE coordinate system::B<sub>x</sub>, nT::log
+bysse::BY in SSE coordinate system::B<sub>y</sub>, nT::log
+bzsse::BZ in SSE coordinate system::B<sub>z</sub>, nT::log
+b_x::B<sub>x</sub> (geo)::B<sub>x</sub>, nT::linear::-60000::30000
+b_y::B<sub>y</sub> (geo)::B<sub>y</sub>, nT::linear::-50000::40000
+b_z::B<sub>z</sub> (geo)::B<sub>z</sub>, nT::linear::-60000::30000
+x::X (geo)::X, km::linear::-9000::9000
+y::Y (geo)::Y, km::linear::-9000::9000
+z::Z (geo)::Z, km::linear::-9000::9000
+bxvso::B<sub>x</sub> VSO::B<sub>x</sub>, nT::linear::-50::70
+byvso::B<sub>y</sub> VSO::B<sub>y</sub>, nT::linear::-70::50
+bzvso::B<sub>z</sub> VSO::B<sub>z</sub>, nT::linear::-70::50
+bx::Bx GSE, GSM::B<sub>x</sub>, nT::linear::-40::50
+bz::Bz GSM::B<sub>z</sub>, nT::linear::-30::30
+bygse::By GSE::B<sub>y</sub>, nT::linear::-70::50
+bzgse::Bz GSE::B<sub>z</sub>, nT::linear::-45::45
+bygsm::By GSM::B<sub>y</sub>, nT::linear::-75::45
+bzgsm::Bz GSM::B<sub>z</sub>, nT::linear::-45::45
+bavr::Field Magnitude average::B<sub>avr</sub>, nT::log
+bvavr::Magnitude of average field vector::Bv<sub>avr</sub>, nT::log
+sigmab::Average magnitude standard deviation::&sigma;B, nT::log
+sigmb::Field vector standard deviation::&sigma;B, nT::log
+sigmbx::GSE X-component standard deviation::&sigma;B<sub>x</sub>, nT::linear::0::24
+sigmby::GSE Y-component standard deviation::&sigma;B<sub>y</sub>, nT::linear::0::90
+sigmbz::GSE Z-component standard deviation::&sigma;B<sub>z</sub>, nT::linear::0::120
+babs::Field Magnitude::|B|, nT::linear::0::60
+bscal::Scalar B::B, nT::log
+xvso::X VSO::X, R<sub>V</sub>::linear::-12::12
+yvso::Y VSO::Y, R<sub>V</sub>::linear::-12::12
+zvso::Z VSO::Z, R<sub>V</sub>::linear::-6::6
+latbva::Lat.angle of average field vector::&Phi;<sup>o</sup>::linear::-90::90
+lonbva::Long.angle of average field vector::&lambda;<sup>o</sup>::linear::0::360
+dpress::Plasma pressure::P, Pa::linear::0::0
+tpress::Plasma thermal pressure::P<sub>T</sub>, Pa::linear::0::0
+vbulk::Plasma flow bulk velocity::V<sub>bulk</sub>, km/s::linear::0::9000
+sigmv::Plasma velocity standard deviation::&sigma;V<sub>bulk</sub>, km/s::linear::0::300
+dens::Plasma density::&rho;, cm<sup>-3</sup>::log
+densp::Plasma proton density::&rho;<sub>p</sub>, cm<sup>-3</sup>::linear::0::24
+densa::Plasma alpha density::&rho;<sub>&alpha;</sub>, cm<sup>-3</sup>::linear::0::1.8
+idens::Ion density::&rho;<sub>ion</sub> cm<sup>-3</sup>::log
+sigmd::Ion density standard deviation::&sigma;&rho;<sub>p</sub>, cm<sup>-3</sup>::linear::0::120
+kfe0d2_1::E<sub>e</sub> 0.2 - 1.0MeV::I, Hz::log
+kfe1_4::E<sub>e</sub> 1 - 4MeV::I, Hz::log
+kfe4_::E<sub>e</sub> &gt; 4MeV::I, Hz::log
+kfp4_16::E<sub>p</sub> 4 - 16MeV::I, Hz::log
+kfp16_28::E<sub>p</sub> 16 - 28MeV::I, Hz::log
+kfp41_55::E<sub>p</sub> 41 - 55MeV::I, Hz::log
+kfp80_::E<sub>p</sub> &gt; 80MeV::I, Hz::log
+kfa5_16::E<sub>&alpha;</sub> 5-16MeV/nucleon::I, Hz::log
+kfa16_24::E<sub>&alpha;</sub> 16 - 24MeV/nucleon::I, Hz::log
+kfc6_15::CNO 6 - 15MeV/nucleon::I, Hz::log
+t2e0d5_::Charged particles::log
+t2f300_400::Photons with 300nm &lt; &lambda; &lt; 400nm::log
+t2f600_700::Photons with 600nm &lt; &lambda; &lt; 700nm::log
