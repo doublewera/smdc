@@ -1,0 +1,322 @@
+<!-- // Additional scripts -->
+<script src="js/jquery-1.7.1.js"    type="text/javascript"> </script>
+<script src="js/development-bundle/ui/jquery-ui-1.8.17.custom.js" type="text/javascript"> </script>
+<!--        // JQuery library: http://jquery.com/
+</script -->
+<script src="js/details.js"         type="text/javascript"> </script>
+<!--        // Contains SWITCHDIV functions for [buttons] in brackets ;)
+</script -->
+<script src="app/weatherUpdate.js"   type="text/javascript"> </script>
+<!--         // Realtime rss updates: moving red and blue lines and replaces values
+</script -->
+
+<script type="text/javascript">
+<!--
+// There should be an array of blue hyperlinks []
+var sections=new Array('Overview', 'realtime', 'Data_retrieval');
+
+var page = '';
+var currDiv;
+var currSubdiv;
+var dtStart;
+
+function preparetime() {
+    var data = "2010-08-01 00:00:00,None"
+    var datetimeArray = parseDtArray(data);
+    var dtftarr = ['From', 'Till'];
+    var dtnow = new Date();
+    if (datetimeArray[1]) {
+        dtnow = datetimeArray[1];
+    }
+    for (var dti in dtftarr) {
+        var dtid = 'dtint' + dtftarr[dti];
+        $("#" + dtid).datepicker({
+            changeMonth: true,
+            changeYear: true,
+            duration: 'fast',
+            dateFormat: 'M, d, yy',
+            minDate: datetimeArray[0],
+            maxDate: dtnow,
+            firstDay: 1
+        });
+    }
+    $("#dtintFrom").datepicker("setDate", dtnow);
+    $("#dtintTill").datepicker("setDate", dtnow);
+    populatetime();
+    document.getElementById("hhTill").options[1].selected = true;
+}
+
+function retrieve(form) {
+ var fields = form.elements;
+ var params="";
+ for (var i=0; i<fields.length; i++) {
+  if (fields[i].type=='checkbox' && fields[i].checked) {
+   params+=fields[i].name+'=yes&';
+  }
+ }
+ var dateFrom = $("#dtintFrom").datepicker("getDate");
+ var dateTill = $("#dtintTill").datepicker("getDate");
+ dateFrom = dateFrom.getFullYear() + "-" + padout(dateFrom.getMonth() + 1) + "-" + padout(dateFrom.getDate());
+ dateTill = dateTill.getFullYear() + "-" + padout(dateTill.getMonth() + 1) + "-" + padout(dateTill.getDate());
+ var hhFrom = $('#hhFrom').val();
+ var mmFrom = $('#mmFrom').val();
+ var ssFrom = $('#ssFrom').val();
+ var hhTill = $('#hhTill').val();
+ var mmTill = $('#mmTill').val();
+ var ssTill = $('#ssTill').val();
+ var timeFrom = hhFrom + ":" + mmFrom + ":" + ssFrom;
+ var timeTill = hhTill + ":" + mmTill + ":" + ssTill;
+ params += "dtFrom=" + dateFrom + "_" + timeFrom + '&';
+ params += "dtTill=" + dateTill + "_" + timeTill + '&';
+ params += 'page=' + page + '&';
+ params += 'switchdiv=' + currDiv + '&';
+ params += 'switchsubdiv=' + currSubdiv + '&';
+
+ params += 'resolution=' + $('input[name=resolution]:checked').val() + '&';
+ params += 'xoutput=' + $('input[name=xoutput]:checked').val() + "&";
+
+  document.getElementById('tableplace').innerHTML="<h3 align='center'>_GENLOADING_</h3>";
+  dtStart = new Date();
+  $.get(
+     "app/rss.py/userdata?" + params,
+     function(data) {
+        document.getElementById("tableplace").innerHTML = data;
+     }
+  );
+}// THE END OF RETRIEVE FUNCTION
+
+var selectedInstrument = "";
+
+function padout(number) { return (number < 10) ? '0' + number : number; }
+
+function populatetime() {
+    var FT = ["From", "Till"];
+    for (var k in FT) {
+      for (var i=0; i<24; i++) {
+        var o = new Option(padout(i), padout(i));
+        o.id = padout(i);
+        o.name = padout(i);
+        document.getElementById('hh' + FT[k]).options[i] = o;
+      }
+      $('#hh' + FT[k])[0].selected = true;
+    }
+    var mmss = ["mm", "ss"];
+    for (var i=0; i<60; i++) {
+     for (var j in mmss) {
+      for (var k in FT) {
+       var o = new Option(padout(i), padout(i));
+       o.id = padout(i);
+       o.name = padout(i);
+       document.getElementById(mmss[j] + FT[k]).options[i] = o;
+      }
+     }
+    }
+}
+
+function parseDtArray(data) {
+    var dtstrarr = data.split(",");
+    var dtArr = [];
+    for (i in dtstrarr) {
+        if (dtstrarr[i] === "None") {
+            dtArr[i] = null;
+        } else {
+            var ymdhms = dtstrarr[i].split(" ");
+            var ymd = ymdhms[0].split("-");
+            var hms = ymdhms[1].split(":");
+            var YYYY = parseInt(ymd[0]);
+            var MM = parseInt(ymd[1][0])*10 + parseInt(ymd[1][1]) - 1;
+            var DD = parseInt(ymd[2][0])*10 + parseInt(ymd[2][1]);
+            var dt = new Date(YYYY, MM, DD, hms[0], hms[1], hms[2]);
+            dtArr[i] = dt;
+        }
+    }
+    return dtArr;
+}
+
+function markswitch(page_x) {
+ page = page_x;
+}
+
+function showTable(target) {
+    document.getElementById(target + "_shower").setAttribute("value", "Hide " + target + " data table");
+    document.getElementById(target + "_shower").setAttribute("onclick", "hideTable('"+target+"')");
+    document.getElementById(target).style.display = "table";
+}
+
+function hideTable(target) {
+    document.getElementById(target + "_shower").setAttribute("value", "Show " + target + " data table");
+    document.getElementById(target + "_shower").setAttribute("onclick", "showTable('"+target+"')");
+    document.getElementById(target).style.display = "none";
+}
+
+$(document).ready(preparetime);
+$(document).ready(refreshData);
+
+//-->
+</script>
+
+<h3 class="separator" align="center">Magnetopause Stand-off Distance Monitor</h3>
+
+[<a shape="rect" id="Overview_caller" href="javascript:switchdiv('Overview')">_GENOVERVIEW_</a>] <!-- button -->
+[<a shape="rect" id="realtime_caller" href="javascript:switchdiv('realtime')">Realtime Monitor</a>] <!-- button -->
+[<a shape="rect" id="Data_retrieval_caller" href="javascript:switchdiv('Data_retrieval')">Stand-off Distance Data Archive</a>]   <!-- button -->
+
+<div style="display:none;font-family:Arial" id="Overview">
+
+<!-- h3>Magnetopause stand-off distance monitor</h3 -->
+<table border=0>
+<tr><td border=0 valign="top">
+<p style="text-indent:15px"> The data recived from <b>ACE</b> satellite. The Advanced Composition Explorer (ACE) is an Explorer mission that 
+was managed by the Office of Space Science Mission and Payload Development Division 
+of the National Aeronautics and Space Administration (NASA). 
+</p>
+<p style="text-indent:15px"> <b>ACE</b> launched on a McDonnell-Douglas Delta II 7920 launch vehicle on August 25, 1997 
+from the Kennedy Space Center in Florida.
+The spacecraft has enough propellant on board to maintain an orbit at L1 until ~2024.
+</p>
+<p style="text-indent:15px"> <b>ACE</b> orbits the L1 libration point which is a point of Earth-Sun gravitational equilibrium about 
+1.5 million km from Earth and 148.5 million km from the Sun. 
+<p style="text-indent:15px"> <b>ACE</b> provides near-real-time 24/7 continuous coverage of solar wind parameters 
+and solar energetic particle intensities (space weather).
+</p>
+</td><td valign="top">
+<a href="http://www.srl.caltech.edu/ACE/"><img id="newpicture001" src="sat/img/ace.jpg" alt="" /><br /></a>
+<a href="http://www.srl.caltech.edu/ACE/">More on the <b>ACE</b> personnel, including scientific Co-Investigators can be found here. </a>
+</td></TR></TABLE>
+<p valign="top" style="text-indent:15px"><b>This monitor</b> provides magnetopause stand-off distance (geocentric distance to the magnetopause subsolar point, R<sub>ss</sub>) calculated in accordance with the [Kuznetsov-Suvorova, 1998] model: <div align="center" style="color:#c02020">
+<b>
+ R<sub>ss</sub> = 8.6*(1 + 0.407*exp( - (|B<sub>z</sub>| - B<sub>z</sub>)<sup>2</sup>/200/p<sup>0.15</sup>))*p<sup>-0.19</sup>
+</b>
+<br />
+<!-- img src="img/rss.png" -->
+<!-- Заменить * на звездочки, поставить умножение пееред скобкой и перед P, увеличить число 200 и P, вообще весь шрифт -->
+<!-- math>
+8.6\left(1 + 0.407e^{{-(|Bz| - Bz)^2}\over{200*p^{0.15}}}*p^{-0.19}\right)
+</math -->
+</div></p>
+<p style="text-indent:15px"> <b>B<sub>z</sub> [nT]</b> (interplanetary magnetic field z-component is GSM coordinates) and <b> P [nPa]</b> (solar wind dynamic pressure) are measured by ACE spacecraft at UT<sub>ACE</sub> time instant.</p>
+<p style="text-indent:15px"> Highlighted rows in the source data table indicate the solar wind conditions that are estimated to be bound to the Earth's magnetosphere at current UT<sub>ace</sub>=<span id="currUT">20:57</span></p>
+<p style="text-indent:15px"> The corresponding magnetopause stand-off distance overage value is R<sub>ss</sub>=<span id='RssCalc'>12</span></p>
+<!-- 13 (from 9 to 17 R<sub>Earth</sub>)</p -->
+<p>Special thanks to the ACE team (<a href="http://www.sec.noaa.gov/ace/">http://www.sec.noaa.gov/ace/</a>) for providing real-time solar wind and magnetic field data.</p>
+</div>
+
+<div style="display:none;font-family:Arial" id="realtime">
+<p>Magnetopause stand-off distance calculated using solar wind data measured by ACE spacecraft</p>
+<table width="100%" cellspacing="0" cellpadding="0">
+<tr>
+  <td id="currenthour" width="375" height="340" style="background-repeat:no-repeat" background="ftp://213.131.1.4/ace/plots/1m/currenthour.png">
+    <div id="yellowLineHourlyComment" style="left:+54px;top:+10px;position:relative;color:#000000;">Current time</div>
+    <div id="currentBzMove" style="left:+54px;top:+10px;position:relative;color:#000000;">Current bz</div>
+    <div id="currentPswMove" style="left:+54px;top:+10px;position:relative;color:#000000;">Current Psw</div>
+    <div id="currentRssMove" style="left:+54px;top:+10px;position:relative;color:#dd0000;">Current Rss</div>
+    <div id="yellowLineHourly" style="background:#dd0000;width:2px;height:200px;left:+54px;top:+17px;position:relative">&nbsp;</div>
+  </td>
+  <td id="currentday" width="375" height="340" background="ftp://213.131.1.4/ace/plots/1h/currentday.png" style="background-repeat:no-repeat">
+  <!-- div id="yellowLineDaily" style="background:#dddd00;width:2px;height:240px;left:+54px;top:+17px;position:relative;">&n$ -->
+  </td>
+</tr>
+<tr>
+  <td valign="top" align="center">
+    <input id="minutely_shower" type="button" value="Show minutely data table" onclick="showTable('minutely')"/>
+  </td><td valign="top" align="center">
+    <input id="hourly_shower"   type="button" value="Show hourly data table"   onclick="showTable('hourly')"/>
+  </td>
+</tr>
+<tr id="realtimetables">
+</tr>
+</table>
+</div>
+
+<div style="display:none;font-family:Arial" id="Data_retrieval">
+<form id="request_data">
+<table cellpadding="0px" cellspacing="0px" border="0" valign="top" width="100%">
+<!-- tr>
+    <td class="separator" width="300px" colspan="6">
+        _GENTIME_
+    </td>
+
+</tr -->
+<tr>
+<td colspan="6"> <!-- -- -- -- THERE IS DATETIME SELECTOR -- -- -- -->
+<table>
+        <tr><th align="right"><label for="dtintFrom">From</label></th>
+            <td><input id="dtintFrom" name="dtintFrom" type="text" style="border:none"/></td>
+            <td><select id="hhFrom" name="hhFrom" style="background: transparent;border:none;"> </select>
+             <b>:</b> <select id="mmFrom" name="mmFrom" style="background: transparent;border:none"> </select>
+             <span style="display:none">
+              <b>:</b> <select id="ssFrom" name="ssFrom" style="background: transparent;border:none"> </select>
+             </span>
+            </td>
+        </tr>
+        <tr><th align="right"><label for="dtintTill">Till</label></th>
+            <td><input id="dtintTill" name="dtintTill" type="text" style="border:none"/></td>
+            <td><select id="hhTill" name="hhTill" style="background: transparent;border:none"> </select>
+             <b>:</b> <select id="mmTill" name="mmTill" style="background: transparent;border:none"> </select></td>
+             <span style="display:none">
+              <b>:</b> <select id="ssTill" name="ssTill" style="background: transparent;border:none"> </select>
+             </span>
+           </td>
+         </tr>            
+</table>
+</td>
+</tr>
+
+
+<tr><td class="separator" colspan="6">_GENOUTPUT_</td></tr>
+<tr>
+    <td>
+    <input type="radio" name="xoutput" value="numbers" checked="checked" />_GENNUMERIC_
+    <input type="radio" name="xoutput" value="graph" />_GENGRAPHIC_
+    <input type="radio" name="xoutput" value="file" />_GENFILE_
+    </td>
+</tr>
+<tr><td class="separator" colspan="6"> Data parametrs</td></tr>
+<tr><td>
+ <input type="checkbox" name="velocity" id="velocity"> <!-- v_bulk -->
+     </input>
+     <label for="velocity"> Velocity, km/s </label>
+</td></tr>
+<tr><td>
+ <input type="checkbox" name="density" id="density">
+     </input>
+     <label for="density">Density, cm<sup>-3</sup></label>
+</td></tr>
+<tr><td>
+ <input type="checkbox" name="b_z" id="b_z">
+     </input>
+     <label for="b_z">Interplanetary magnetic field (bz), nT </label>
+</td></tr>
+<tr><td>
+ <input type="checkbox" name="pressure" id="pressure"> <!-- Psw_calc -->
+     </input>
+     <label for="pressure"> Pressure of solar wind, nPa </label>
+</td></tr>
+<tr><td>
+
+ <input type="checkbox" name="rss" id="rss" checked="checked"> <!-- Rss_calc -->
+     </input>
+     <label for="rss"> Distance to subsolar point, R<sub>E</sub> </label>
+</td></tr>
+<tr>
+    <td>
+    <input type="radio" name="resolution" value="1h" checked="checked" />Hourly
+    <input type="radio" name="resolution" value="1m" />Minutely
+    </td>
+</tr>
+<tr>
+    <td valign="top" align="left" class="separator" colspan="6">
+        <input value="_GENRETRIEVE_" type="button" onclick="javascript:retrieve(document.getElementById('request_data'));"/>
+    </td>
+</tr>
+<tr><td  id="tableplace" colspan="6"> 
+</td></tr>
+
+</td></tr>
+</table>
+</form>
+</div>
+
+</div>
+
+
