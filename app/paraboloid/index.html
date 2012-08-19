@@ -1,0 +1,256 @@
+<script type="text/javascript" src="js/loader.js"> </script>
+<script type="text/javascript" src="js/populate.js"> </script>
+<script type="text/javascript" src="js/jquery-1.3.js"> </script>
+<script type="text/javascript">
+<!--
+var sections=new Array('Overview','Interactive','model','earth','saturn','Code');
+
+var day_begin=21, day_end=21; // day from zero!!!
+var month_begin=10, month_end=10; // month from zero
+var year_begin=1965, year_end=1965;
+var hour_begin = 0, hour_end = 23;
+var loader;
+var page = '';
+var currDiv;
+var currSubdiv;
+var loader;
+
+$(document).ready(function(){$("#sourcecode").load("/smdc/app/paraboloid/src/parabmod.for")});
+
+function selectedForm() {
+ if ($("#saturn").css("display") != "none") {
+   return "s";
+ }
+ if ($("#earth").css("display") != "none") {
+   return "e";
+ }
+ if ($("#model").css("display") != "none") {
+   return "m";
+ }
+ return "";
+}
+
+function retrieve(form) {
+ selectedForm();
+ var fields = form.elements;
+ var params="";
+ params+='ut='+document.forms.request_data.elements['xhr0'].value+'&';
+ params+='iy='+document.forms.request_data.elements['xyr0'].value+'&';
+ params+='mo='+document.forms.request_data.elements['xmn0'].value+'&';
+ params+='id='+document.forms.request_data.elements['xdy0'].value+'&';
+
+ if (selectedForm() === "m") {
+  params+='ro='+document.forms.request_data.elements['ro_m'].value+'&';
+  params+='v='+document.forms.request_data.elements['v_m'].value+'&';
+  params+='bz='+document.forms.request_data.elements['bz_m'].value+'&';
+  params+='dst='+document.forms.request_data.elements['dst_m'].value+'&';
+  params+='al='+document.forms.request_data.elements['al_m'].value+'&';
+  params+='x='+document.forms.request_data.elements['x_m'].value+'&';
+  params+='y='+document.forms.request_data.elements['y_m'].value+'&';
+  params+='z='+document.forms.request_data.elements['z_m'].value+'&';
+  params+='graph='+document.forms.request_data.elements['graph_m'].value;
+ }
+ if (selectedForm() === "e") {
+ }
+ if (selectedForm() === "s") {
+ }
+ loader=ContentLoader;
+// document.getElementById('target').innerHTML="<h3 align='center'>_GENLOADING_</h3>";
+ if (document.forms.request_data.elements['graph_m'].value == "D") {
+  loader.load('http://'+document.domain+'/smdc/app/paraboloid/m.py?' + params,show,'GET','');
+ } else {
+  document.getElementById('target').innerHTML='<img src="http://'+document.domain+'/smdc/app/paraboloid/m.py?'+params+'" / >';
+ }
+}
+
+function show() {
+ document.getElementById('target').innerHTML=loader.req.responseText;
+}
+
+
+-->
+</script>
+<script src="js/details.js" type="text/javascript"></script>
+<h3 class="separator" align="center">_PARATITLE_</h3>
+<table><tr><td width="100%">
+[<a shape="rect" id="Overview_caller" href="javascript:switchdiv('Overview')">_GENOVERVIEW_</a>]
+[<a shape="rect" id="model_caller" href="javascript:switchsubdiv('Interactive','model')">Interactive Model</a>]
+[<a shape="rect" id="earth_caller" href="javascript:switchsubdiv('Interactive','earth')">Interactive Earth</a>]
+[<a shape="rect" id="saturn_caller" href="javascript:switchsubdiv('Interactive','saturn')">Interactive Saturn</a>]
+[<a shape="rect" id="Code_caller" href="javascript:switchdiv('Code')">_GENSOURCE_</a>]
+</td></tr></table>
+
+<div style="display:none" id="Overview">
+<p align="right">The <a href="public/article/parabmod.pdf">description of the model</a>
+can be downloaded in <a href="public/article/parabmod.pdf">PDF</a>, (126K).</p>
+_PARAMAN_ 
+</div>
+
+<table width="100%"><tr><td valign="top"> <!-- LEFT COLUMN -->
+<form id="request_data" action="paraboloid.py">
+
+<div style="display:none" id="Interactive">
+<table border="0">
+<tr><td class="separator" colspan="2">_GENTIME_</td></tr>
+<tr><td colspan="2">
+<select name="xdy0" id="day_begin_select"><option value="0"></option></select>
+<select name="xmn0" id="month_begin_select" onchange="javascript:populate_begin()"><option value="0"></option></select>
+<select name="xyr0" id="year_begin_select" onchange="javascript:populate_begin()"><option value="0"></option></select>, 
+<select name="xhr0" id="hour_begin_select"><option value="0"></option></select> hour(s)
+<select name="xmi0" id="minute_begin_select" style="display:none"><option value="0"></option></select>
+</td></tr>
+<tr style="display:none"><td>
+<select name="xdy1" id="day_end_select"><option value="0"></option></select>
+<select name="xmn1" id="month_end_select" onchange="javascript:populate_end()"><option value="0"></option></select>
+<select name="xyr1" id="year_end_select" onchange="javascript:populate_end()"><option value="0"></option></select>
+<select name="xhr1" id="hour_end_select"><option value="0"></option></select>:
+<select name="xmi1" id="minute_end_select"><option value="0"></option></select>
+</td></tr></table>
+
+<div style="display:none" id="model">
+  <!-- p>
+  The dynamic paraboloid model of magnetosphere was developed in the
+  Laboratory of planet magnetospheres of the Institute of Nuclear Physics, 
+  Moscow State University. This model enables calculations of changes in 
+  magnetic field of large-scale msgnetospheric current systems using 
+  observational data obtained during calcm and disturbed periods of 
+  solar activity. The model can be used to forcast cosmic weather, to study
+  the influence of cosmic factors on the human wealth, to protect space
+  craft from radiation as well as in the applied fields of space environment
+  physics. 
+  </p -->
+  <!-- p>
+  Calculations performed in terms of the parabploid model can be presented
+  in graphycal form. 1) magnetic field; 2) distribution along Earth-Sun line
+  </p -->
+ <table>
+  <tr><td colspan="2">
+   <select name="graph_m">
+    <option value="D" selected="selected">Magnetic field</option>
+    <option value="E">Distribution along Sun-Earth line</option>
+   </select>
+  </td></tr>
+  <tr><td>Solar wind density:</td>
+  <td>
+   <input type="text" name="ro_m" value="10" size="3" />1/cm^3, [0 - 100]
+  </td>
+  </tr>
+  <tr><td>Solar vind velocity</td>
+  <td>
+   <input type="text" name="v_m" value="340" size="3" />km/s, [0 - 2000]
+  </td>
+  </tr>
+  <tr><td>Bz-component of the IMF</td>
+  <td>
+   <input type="text" name="bz_m" value="-5" size="3" />nT, [-50 - +50]
+  </td>
+  </tr>
+  <tr><td>Dst-index</td>
+  <td>
+   <input type="text" name="dst_m" value="-140" size="3" />nT, [-600 - +50]
+  </td>
+  </tr>
+  <tr><td>AL-index</td>
+  <td>
+   <input type="text" name="al_m" value="-400" size="3" />nT, [-5000 - +50]
+  </td></tr>
+  <tr><td colspan="2">Coordinates of the point where calculations are performed:</td></tr>
+  <tr><td>X=</td><td>
+   <input type="text" name="x_m" value="7" size="3" />Earth's radii</td></tr>
+  <tr><td>Y=</td><td>
+   <input type="text" name="y_m" value="2" size="3" />Earth's radii</td></tr>
+  <tr><td>Z=</td><td>
+   <input type="text" name="z_m" value="0" size="3" />Earth's radii</td></tr>
+ </table>
+</div>
+
+<div style="display:none" id="earth">
+<!-- p>Calculations are performed in terms of the paraboloid model for Earth.
+Figures of polar oval and Earth magnetosphere can be plotted.
+</p -->
+<table border="0">
+<tr><td colspan="2">
+ <select name="graph">
+  <option value="D" selected="selected">The Earth polar oval</option>
+  <option value="E">Earth magnetosphere (xz projection)</option>
+ </select>
+</td></tr>
+<tr><td>Solar wind density:</td>
+<td>
+<input type="text" id="ro" name="ro" value="10" size="3" />1/cm^3, [0 - 100]</td></tr>
+<tr><td >Solar vind velocity</td>
+<td>
+<input type="text" name="v" value="340" size="3" />km/s, [0 - 2000]</td></tr>
+<tr><td >Dst-index</td>
+<td>
+<input type="text" name="dst" value="-140" size="3" />nT,  -600 - +50</td></tr>
+<tr><td>AL-index</td>
+<td>
+<input type="text" name="al" value="-400" size="3" />nT,  -5000 - +50</td></tr>
+<tr><td>Bx-component</td>
+<td>
+<input type="text" name="Bx" value="3.0" size="3" />nT</td>
+</tr>
+<tr><td>By-component</td>
+<td>
+<input type="text" name="By" value="0.04" size="3" />nT</td>
+</tr>
+<tr><td>Bz-component</td>
+<td>
+<input type="text" name="Bz" value="-10.9" size="3" />nT</td>
+</tr>
+</table>
+</div>
+
+<div style="display:none" id="saturn">
+<!-- p>
+Calculations are performed in terms of the paraboloid model for Saturn.
+Figures of polar oval and Saturn magnetosphere can be plotted.</p -->
+<table border="0">
+<tr><td colspan="2">
+ <select name="graph">
+  <option value="D" selected="selected">The Saturn polar oval</option>
+  <option value="E">Saturn magnetosphere (xz projection)</option>
+ </select>
+</td></tr>
+<tr><td>bdc11</td>
+<td><input type="text" name="bdc11" value="3.6" size="3" />nT</td>
+</tr>
+<tr><td>Bt</td>
+<td><input type="text" name="bt" value="-8.7" size="3" />nT</td>
+</tr>
+<tr><td>rd1</td>
+<td><input type="text" name="rd1" value="12.5" size="3" />Rs</td>
+</tr>
+<tr><td>rd2</td>
+<td><input type="text" name="rd2" value="6.5" size="3" />Rs</td>
+</tr>
+<tr><td>R1</td>
+<td><input type="text" name="R1" value="17.5" size="3" />Rs</td>
+</tr>
+<tr><td>R2</td>
+<td><input type="text" name="R2" value="14.0" size="3" />Rs</td>
+</tr>
+<tr><td>Bx-componet</td>
+<td><input type="text" name="Bx" value="0.0" size="3" />nT</td>
+</tr>
+<tr><td>By-component</td>
+<td><input type="text" name="By" value="0.04" size="3" />nT</td>
+</tr>
+<tr><td>Bz-component</td>
+<td><input type="text" name="Bz" value="0.4" size="3" />nT</td>
+</tr>
+</table>
+</div> <!-- End of Saturn -->
+
+<input value="_GENRETRIEVE_" type="button" onclick="javascript:retrieve(document.getElementById('request_data'));" />
+
+</div> <!-- End of Interactive -->
+</form>
+</td><td valign="top" id="target"> <!-- RIGHT COLUMN -->
+</td></tr></table>
+
+<div style="display:none" id="Code">
+<p align="right"><a href="app/paraboloid/src/parabmod.for">Download code</a> (71K)</p>
+<pre id="sourcecode" /></div>
+

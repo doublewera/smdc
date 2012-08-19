@@ -1,0 +1,65 @@
+
+<!-- p>Simple calculation<p -->
+<p>The dynamic paraboloid model of magnetosphere was developed in the
+Laboratory of planet magnetospheres of the Institute of Nuclear Physics, 
+Moscow State University. This model enables calculations of changes in 
+magnetic field of large-scale msgnetospheric current systems using 
+observational data obtained during calcm and disturbed periods of 
+solar activity. The model can be used to forcast cosmic weather, to study
+the influence of cosmic factors on the human wealth, to protect space
+craft from radiation as well as in the applied fields of space environment
+physics. 
+</p>
+<p>
+Calculations performed in terms of the parabploid model can be presented
+in graphycal form for: <!-- 1) magnetic field; 2) distribution along Earth-Sun line -->
+</p>
+<form id="request_data">
+
+<table border="0">
+<tr><td class="separator" colspan="2">_GENTIME_</td></tr>
+<tr><td colspan="2">
+<select name="xdy0" id="day_begin_select"><option value="0"></option></select>
+<select name="xmn0" id="month_begin_select" onchange="javascript:populate_begin()"><option value="0"></option></select>
+<select name="xyr0" id="year_begin_select" onchange="javascript:populate_begin()"><option value="0"></option></select>
+<select name="xhr0" id="hour_begin_select"><option value="0"></option></select>:
+<select name="xmi0" id="minute_begin_select" style="display:none"><option value="0"></option></select>
+</td></tr>
+<tr><td colspan="2">
+ <select name="graph">
+  <option value="D">Magnetic field
+  <option value="E">Distribution along Sun-Earth line
+ </select>
+</td></tr>
+<tr><td>Solar wind density:</td>
+<td width="200">
+<input type="text" name="ro" value="10" size="3">1/cm^3, [0 - 100]</td></tr>
+<tr><td >Solar vind velocity</td>
+<td width="200">
+<input type="text" name="v" value="340" size="3">km/s, [0 - 2000]</td></tr>
+<tr><td >Bz-component of the IMF</td>
+<td width="200">
+<input type="text" name="bz" value="-5" size="3">nT,   -50 - +50</td></tr>
+<tr><td >Dst-index</td>
+<td  width="200">
+<input type="text" name="dst" value="-140" size="3">nT,  -600 - +50</td></tr>
+<tr><td >Al-index</td>
+<td  width="200">
+<input type="text" name="al" value="-400" size="3">nT,  -5000 - +50</td></tr>
+<tr><td colspan="2">Coordinates of the point where calculations are performed:</td></tr>
+<tr><td width="50">X=</td><td width="20">
+<input type="text" name="x1" value="7" size="3">Earth's radii</td></tr>
+<tr><td width="50">Y=</td><td width="20">
+<input type="text" name="x2" value="2" size="3">Earth's radii</td></tr>
+<tr><td width="50">Z=</td><td width="20">
+<input type="text" name="x3" value="0" size="3">Earth's radii</td></tr>
+<tr>
+ <td>
+  <input value="_GENRETRIEVE_" type="button" onclick="javascript:retrieve(document.getElementById('request_data'));" />
+ </td>
+ <td>
+  <input type="reset">
+ </td>
+</tr>
+</table>
+</form>
