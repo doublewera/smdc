@@ -1,0 +1,163 @@
+<script type="text/javascript" src="js/jquery-1.7.1.js" > </script>
+<script type="text/javascript">
+
+function switchdiv(a) {
+}
+
+function updateRSS(){
+  var currTime = new Date();
+  var Y = currTime.getUTCFullYear();
+  var M = currTime.getUTCMonth()+1;
+  var D = currTime.getUTCDate();
+  var h = currTime.getUTCHours();
+  var m = currTime.getUTCMinutes();
+  params = "Y=" + Y + "&M=" + M + "&D=" + D + "&h=" + h + "&m=" + m;
+//  req = "index.py/getRss?" + params;
+//  alert("app/rss.py/lastRss?" + params);
+  jQuery.getJSON("app/rss.py/lastRss?", params, function(value) {
+//    alert(value);
+//    var array = value;
+    var currTime = new Date();
+    var minutes = currTime.getMinutes();
+    updateRssValue(value);//[minutes]);
+    setTimeout(updateRSS, 60*1000);
+  });
+}
+
+function updateRssValue(val){
+    document.getElementById("RssCalc").innerHTML = val;
+}
+
+updateRSS();
+
+</script>
+<table width="100%" cellpadding="0" cellspacing="0">
+ <tr>
+  <td id="leftColumn">
+   <table width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+     <td valign="top" align="center">
+      <table>
+       <tr>
+        <th class="monitor">
+		Latest data from featured spacecrafts
+        </th>
+       </tr>
+
+       <tr>
+        <!-- Electro-L #1 is alive! Since 2011-01-20 in orbit -->
+        <td align="center" class="monitor">
+          <a style="background-color:#d9e5f2" href="index.py?nav=sat/electro-l1&switchdiv=Charts" >
+            <img style="border: none;" src="http://smdc.sinp.msu.ru/img/electrol/newest.py" alt="mail to alisawera at gmail.com"/>
+          </a>
+        </td>
+       </tr>
+
+       <tr>
+        <!-- Meteor-M #1 is alive! Since 2009-09-17 in orbit -->
+        <td class="monitor" valign="top">
+         <div>
+          <a style="background-color:#d9e5f2" href="http://smdc.sinp.msu.ru/index.py?nav=meteor_m&amp;switchdiv=Charts">
+           <img style="border: none;" src="http://smdc.sinp.msu.ru/img/meteorm/newest.py" alt="mail to alisawera at gmail.com"/>
+          </a>
+         </div>         
+        </td>
+       </tr>
+
+       <!-- Coronas-Photon. R.I.P. We've stored your data. -->
+       <!-- tr>
+        <td class="monitor" valign="top">
+         <div style="float:left; padding:5px">
+          <span>Charged particle fluxes by 
+           <a style="background-color:#d9e5f2" href="http://smdc.sinp.msu.ru/index.py?nav=coronas-photon&amp;switchdiv=Data_retrieval">
+            Coronas-Photon
+           </a>
+           <br/>(instrument: Electron-M-Peska)<br />
+          </span>
+          <br/>
+         <div style="height : 140px">
+          <a style="background-color:#d9e5f2" href="http://smdc.sinp.msu.ru/index.py?nav=coronas-photon&amp;switchdiv=Chart_archive">
+           <img style="border:0px" src="http://smdc.sinp.msu.ru/img/photon/smallhour.png" alt="Last 90 minutes" />
+          </a>
+         </div>
+         <div style="background-color:#d9e5f2">
+          <a style="background-color:#d9e5f2" href="http://smdc.sinp.msu.ru/index.py?nav=coronas-photon&amp;switchdiv=Chart_archive">
+           <img style="border:0px" src="http://smdc.sinp.msu.ru/img/photon/smallday.png" alt="Last 12 hours" />
+          </a>
+         </div>
+        </td>
+       </tr -->
+
+       <!-- Tatyana-2. R.I.P. We've stored your data. -->
+       <!-- tr>
+        <td valign="top" align="center" class="monitor">
+         <div style="padding:4px; float:left">
+          <span>Latest atmospheric flash detected by <a style="background-color:#d9e5f2" href="http://smdc.sinp.msu.ru/index.py?nav=tat2&amp;switchdiv=Data_retrieval">Tatyana-2</a> DUFIK instrument
+          </span><br/>
+         </div>
+         <div>
+          <a style="background-color:#d9e5f2" href="http://smdc.sinp.msu.ru/index.py?nav=tat2&amp;switchdiv=Chart_archive">
+           <img style="border: none;" src="http://smdc.sinp.msu.ru/img/tatyana2/dufik/osc/good/last.py" />
+          </a>
+         </div>
+        </td>
+       </tr -->
+
+      </table>
+     </td>
+    </tr>
+   </table>
+  </td>
+
+  <td valign="top" width="256">
+   <table cellpadding="0">
+    <tr>
+     <th class="monitor">
+      Space weather now
+     </th>
+    </tr>
+    <tr>
+     <td>
+      <table class="monitor" width="100%">
+       <tr>
+        <td><div align="center"><b>_ACELAST_</b></div>_ACECUR_<div align="center" style="color:#c02020">R<sub>ss</sub>=<span id="RssCalc"> </span></div></td>
+       </tr>
+       <tr>
+        <td align="center"><a href="/smdc/index.py?nav=app/rss&amp;switchdiv=realtime" class="history">_ACEVIEW_</a></td>
+       </tr>
+      </table>
+     </td>
+    </tr>
+    <tr>
+     <td>
+      <table class="monitor" style="vertical-align:top" width="100%">
+       <tr><td><ul><li>_SWLINK1_</li><li>_SWLINK2_</li><li>_SWLINK3_</li><li>_SWLINK4_</li><li>_SWLINK5_</li></ul></td></tr>
+        </table>
+     </td>
+    </tr>
+    <tr>
+     <td>
+      <table class="monitor" width="100%" style="float: left">
+       <tr>
+        <td colspan="2">
+         <div align="center">
+          <b>_NOAAINTRO_</b>
+         </div>
+        </td>
+       </tr>
+       <tr>
+        <td>_NOAAXRAY_</td>
+        <td>_NOAAGEOMAG_</td>
+       </tr>
+       <tr>
+        <td><a href="http://www.n3kl.org/sun/noaa.html"><img style="border:none" src="http://www.n3kl.org/sun/images/status.gif" alt="xray" /></a></td>
+        <td><a href="http://www.n3kl.org/sun/noaa.html"><img style="border:none" src="http://www.n3kl.org/sun/images/kpstatus.gif" alt="geomag" /></a></td>
+       </tr>
+      </table>
+     </td>
+   </tr>
+ </table>
+</td>
+</tr>
+</table>
+
