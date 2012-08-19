@@ -1,0 +1,59 @@
+// js/dtSelector.js, js/jquery-1.3.js REQUIRED
+
+var sections    =  new Array('Overview','Data','Charts');
+
+function fillPages(id_where, noradid) {
+    var wheretoput = document.getElementById(id_where);
+    wheretoput.innerHTML = "<h3 class='separator' align='center' id='SAT_HEADER'> </h3><div id='linkstbl' />";
+    $.get(
+        "sat/db.py/info?id=" + noradid + "&silos=name",
+        function(data) {document.getElementById("SAT_HEADER").innerHTML = data;}
+    );
+
+    var linkstbl = document.getElementById("linkstbl");
+    for (var i in sections) {
+        var idprefix = sections[i];
+        if (idprefix != "Data") {
+            lbrct = document.createTextNode("[");
+            ahref = document.createElement("a");
+            ahref.setAttribute("id", idprefix + "_caller");
+            ahref.setAttribute("href", "javascript:switchdiv('" + sections[i] + "')");
+            ahref.innerHTML = sections[i];
+            rbrct = document.createTextNode("]");
+            linkstbl.appendChild(lbrct);
+            linkstbl.appendChild(ahref);
+            linkstbl.appendChild(rbrct);
+        }
+        var divpage = document.createElement("div");
+        divpage.setAttribute("id", sections[i]);
+        wheretoput.appendChild(divpage);
+    }
+    $("#Overview").load("sat/nid/" + noradid + ".html");
+    insertDtSelector('Data', {
+        "dtvalues" : "year,month,day,hour,minute",
+        "uniquePrefix" : "",
+        "uniqueSuffix" : "_begin_select"
+    });
+    $.get("sat/db.py/form?id=" + noradid,
+        function(data) {
+            var newdiv = document.createElement('div');
+            newdiv.innerHTML = data;
+            document.getElementById("Data").appendChild(newdiv);
+            var instrlist = document.getElementById("instruments" + noradid);
+            for (var i in instrlist.childNodes) {
+                var inname = instrlist.childNodes[i].childNodes[0].id;
+                sections.push(inname);
+                lbrct = document.createTextNode("[");
+                ahref = document.createElement("a"); 
+                ahref.setAttribute("id", inname + "_caller");
+                ahref.setAttribute("href", "javascript:switchsubdiv('Data','" + inname + "')");
+                ahref.innerHTML = inname;
+                rbrct = document.createTextNode("]");
+                var linkstbl = document.getElementById("linkstbl");
+                linkstbl.appendChild(lbrct);
+                linkstbl.appendChild(ahref);
+                linkstbl.appendChild(rbrct);
+            }
+        }
+    );
+}

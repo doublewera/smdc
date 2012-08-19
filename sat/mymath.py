@@ -1,0 +1,1 @@
+/home/www/smdc/mymath.py
