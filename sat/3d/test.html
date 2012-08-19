@@ -1,0 +1,31 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" href="/smdc/design/style.css" />
+<link rel="stylesheet" href="/smdc/design/jquery.css/redmond/jquery-ui-1.8.17.custom.css" />
+<title>TEST</title>
+<script type="text/javascript" src="/smdc/js/jquery-1.7.1.js" > </script>
+<script type="text/javascript">
+
+function init() {
+//    var params = "?";
+    var params = "?dy0=06&mn0=03&yr0=2012&hr0=00&mi0=00&dy1=13&mn1=03&yr1=2012&hr1=00&mi1=00";
+    $.get(
+        "oradataget.py/get" + params,
+        function(data) {
+            document.getElementById("tbl").innerHTML = data;
+        }
+    );
+
+}
+init();
+</script>
+
+</head>
+<body>
+<p>Table</p>
+<pre id="tbl">
+</pre>
+</body>
+</html>

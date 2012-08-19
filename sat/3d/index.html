@@ -1,0 +1,1886 @@
+<!--<script type="text/javascript" src="../jquery/jquery-1.3.js" > </script>-->
+<script type="text/javascript" src="http://smdc.sinp.msu.ru/aux/details.js" > </script>
+<script type="text/javascript" src="http://smdc.sinp.msu.ru/aux/populate.js" > </script>
+<script type="text/javascript" src="http://smdc.sinp.msu.ru/aux/loader.js" > </script>
+<script type="text/javascript" src="http://smdc.sinp.msu.ru/aux/localize.js" > </script>
+<script type="text/javascript" src="http://smdc.sinp.msu.ru/aux/menu.js" > </script>
+<script type="text/javascript" src="http://smdc.sinp.msu.ru/aux/size.js" > </script>
+<script type="text/javascript" src="jquery-1.7.2.min.js" ></script>
+<script type="text/javascript" src="glMatrix-0.9.5.min.js"></script>
+<script type="text/javascript" src="webgl-utils.js" ></script>
+
+<script id="shader-vs" type="x-shader/x-vertex">
+	attribute vec3 aVertexPosition;
+	attribute vec3 aVertexNormal;
+	attribute vec2 aTextureCoord;
+
+	uniform mat4 uMVMatrix;
+	uniform mat4 uPMatrix;
+	uniform mat3 uNMatrix;
+
+	uniform vec3 uAmbientColor;
+
+	uniform vec3 uLightingDirection;
+	uniform vec3 uDirectionalColor;
+
+	uniform bool uUseLighting;
+
+	varying vec2 vTextureCoord;
+	varying vec3 vLightWeighting;
+
+	void main(){
+		gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+		vTextureCoord = aTextureCoord;
+
+		if (!uUseLighting) {
+			vLightWeighting = vec3(1.0, 1.0, 1.0);
+		} else {
+			vec3 transformedNormal = uNMatrix * aVertexNormal;
+			float directionalLightWeighting = max(dot(transformedNormal, uLightingDirection), 0.0);
+			vLightWeighting = uAmbientColor + uDirectionalColor * directionalLightWeighting;
+	   }
+
+	}
+</script>
+
+<script id="shader-fs" type="x-shader/x-fragment">
+	#ifdef GL_ES
+	precision highp float;
+	#endif
+
+	varying vec2 vTextureCoord;
+	varying vec3 vLightWeighting;
+
+	uniform sampler2D uSampler;
+
+	void main(void) {
+		vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+		gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
+	}
+</script>
+
+<!--SHADERS 2!!! BEGIN-->
+<script id="shader-vs2" type="x-shader/x-vertex">
+	attribute vec3 aVertexPosition;
+	attribute vec3 aVertexNormal;
+	attribute vec4 aVertexColor;
+
+	uniform mat4 uMVMatrix;
+	uniform mat4 uPMatrix;
+	uniform mat3 uNMatrix;
+
+	uniform vec3 uAmbientColor;
+
+	uniform vec3 uLightingDirection;
+	uniform vec3 uDirectionalColor;
+
+	uniform bool uUseLighting;
+
+	varying vec3 vLightWeighting;
+
+	varying vec4 vColor;
+
+	void main(){
+		gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+		vColor = aVertexColor;
+		if (!uUseLighting) {
+			vLightWeighting = vec3(1.0, 1.0, 1.0);
+		} else {
+			vec3 transformedNormal = uNMatrix * aVertexNormal;
+			float directionalLightWeighting = max(dot(transformedNormal, uLightingDirection), 0.0);
+			vLightWeighting = uAmbientColor + uDirectionalColor * directionalLightWeighting;
+	   }
+
+	}
+</script>
+
+<script id="shader-fs2" type="x-shader/x-fragment">
+	#ifdef GL_ES
+	precision highp float;
+	#endif
+
+	varying vec4 vColor;
+	varying vec3 vLightWeighting;
+	uniform sampler2D uSampler;
+
+	void main(void) {
+		gl_FragColor = vColor;
+	}
+</script>
+<!--SHADERS 2!!! END-->
+
+<script type="text/javascript">
+    var dt = new Date();
+    var day_begin = 7, day_end = dt.getDate() - 1; // day from zero!!!
+    var month_begin = 9, month_end = dt.getMonth();
+    var year_begin = 2009, year_end = dt.getFullYear();
+    var hour_begin = 0, hour_end = 0;
+    var loader;
+    var page = '';
+    var currDiv;
+    var currSubdiv;
+    var access = [];
+	var access_30s = [];
+    var far_dist = -20000;
+    var interest_checked = {};
+    var max = { c1das4hrz: 4.0, c2das4hrz: 3.0, c9das4hrz: 2.0 };
+    var c2das = 0;
+    var indexData_pyr = [];
+    var call_count = 0;
+    var n_params_checked;
+    var drawElCounter = 0;
+    var ind_600;
+    var retrieve_button = false;
+    var count_drawPoints3DData = 0;	
+	var light_R = 0;
+	var light_G = 0;
+	var light_B = 0;
+	var ambient_R = 0;
+	var ambient_G = 0;
+	var ambient_B = 0;
+	var circles = [];
+	var xy;
+	var turnV = 0;
+	var turnH = 0;
+	var turnV2Point = 0;
+	var turnH2Point = 0;
+	var chanel_chosen = 0;
+    // Earth Radius
+    var radius = 6371; // alt = +/- 828
+	var jsonArray = [];
+	var keyChosen;
+	var pointsSatCurr = [];
+	var delta;
+	var averaging=0;
+	var access = [];
+
+    var sections = new Array('Overview', '3dView');
+
+	function retrieve_onclick(form) {
+		if (retrieve_button == false){
+			retrieve_button = true;
+			retrieve(form);		
+			webGLStart();
+		}
+	}	
+	
+    function retrieve(form) {
+		var ni = document.getElementById('buttontdid');
+		
+        var inProgress = document.createElement('img');
+        inProgress.setAttribute('src', 'loading.gif');
+        inProgress.setAttribute('id', 'inProgressId');
+        inProgress.setAttribute('innerHTML', 'Please, wait while loading data...');
+        ni.appendChild(inProgress);
+		
+		var labelProgress = document.createElement('label');
+        labelProgress.setAttribute('id','labelProgressId');
+        labelProgress.setAttribute('innerHTML', 'Please, wait while loading data...');
+        labelProgress.setAttribute('for','inProgressId');
+        labelProgress.setAttribute('value', 'Please, wait while loading data...');
+        ni.appendChild(labelProgress);
+		
+		form_request(form);		
+		
+		far_dist = -24000;
+    }
+	
+	function form_request(form) {
+		var fields = form.elements;
+        var params = "";
+		averaging = 0;
+        n_params_checked = 0;
+		interest_checked = {};
+        for (var i = 0; i < fields.length; i++) {
+            if ((fields[i].type == 'radio' || fields[i].type == 'checkbox') && fields[i].checked) {   // && fields[i].value.substring(0,1)==page) {
+                var str_tmp = fields[i].value.substring(1);
+                params += str_tmp + '=' + str_tmp + '&';
+                if ((str_tmp.substring(1) == "das4hrz") || (str_tmp == "mip")) {
+                    n_params_checked++;
+					interest_checked["c" + str_tmp] = n_params_checked;
+                };
+            }
+        }
+		
+		var dateArr_from = document.getElementById('from_time').value.split('-');
+		
+		params += 'dy0=' + dateArr_from[0] + '&';
+        params += 'mn0=' + dateArr_from[1] + '&';
+        params += 'yr0=' + dateArr_from[2] + '&';
+        params += 'hr0=' + document.getElementById('hour_from_select').value + '&';
+        params += 'mi0=' + document.getElementById('minute_from_select').value + '&';
+        
+		var dateArr_to = document.getElementById('to_time').value.split('-');
+		
+		params += 'dy1=' + dateArr_to[0] + '&';
+        params += 'mn1=' + dateArr_to[1] + '&';
+        params += 'yr1=' + dateArr_to[2] + '&';
+        params += 'hr1=' + document.getElementById('hour_to_select').value + '&';
+        params += 'mi1=' + document.getElementById('minute_to_select').value + '&';
+        params += 'width=' + totalWidth() + '&';
+        params += 'page=' + page + '&';
+        params += 'switchdiv=' + currDiv + '&';
+        params += 'switchsubdiv=' + currSubdiv + '&';
+        params += 'output=numbers&';
+        params += 'src=meteor-m1_msgi';
+		
+		$.get(
+			"http://213.131.1.8/smdc/sat/3d/oradataget.py/get?" + params,
+			function(data) {
+				show(data);
+			}
+		);
+    }
+
+	function show(data) {
+        //if (retrieve_button == false) document.getElementById('targetForTxt').innerHTML=loader.req.responseText;
+		//var responseText_editedTime = loader.req.responseText;
+		access = [];
+		var responseText_editedTime = data;
+
+		var lines = responseText_editedTime.split('\n');		
+		
+		var re = /\s* \s*/;
+		if (lines.length > 3) {
+			for (i = 2; (i < lines.length); i++) {
+				var cell = lines[i].split(re);
+				var tmpCell = [];				
+				tmpCell.push(cell[1] + " " + cell[2]); //date + time
+				tmpCell.push(cell[3]); // channel
+				tmpCell.push(cell[4]); // x
+				tmpCell.push(cell[5]); // y
+				tmpCell.push(cell[6]); // z
+				tmpCell.push(cell[7]); // lat
+				tmpCell.push(cell[8]); // lon
+				tmpCell.push(cell[9]); // alt
+				access.push(tmpCell);
+			};
+		};
+		
+		var ni = document.getElementById('buttontdid');
+       	var inProgress = document.getElementById('inProgressId');
+       	ni.removeChild(inProgress);
+      	retrieve_button = false;
+	}
+	
+
+	function parseDate(value) {
+		var date_and_time = value.split(" ");
+		var date_part = date_and_time[0].split("-");
+		var time_part = date_and_time[1].split(":");
+		return { day: date_part[2], month: date_part[1], year: date_part[0], hours: time_part[0], minutes: time_part[1], seconds: time_part[2] };
+	}
+	
+	function initDataStamp(dataString){
+		var newDataStamp = new Date();
+		newDataStamp.setDate(parseDate(dataString).day);
+		newDataStamp.setMonth(parseDate(dataString).month);
+		newDataStamp.setYear(parseDate(dataString).year);
+		newDataStamp.setHours(parseDate(dataString).hours);
+		newDataStamp.setMonth(parseDate(dataString).minutes);
+		newDataStamp.setYear(parseDate(dataString).seconds);
+		return newDataStamp;
+	}
+	
+	function getSource_onclick(form) {	
+		retrieve_button = true;
+		retrieve(form);		
+		document.getElementById('targetForTxt').innerHTML = access.toString();
+	}
+	
+	function setExactPoint_onclick(lat,lon) {
+		for (var row = 0; (row < access.length); row++) {
+			if((access[row][n_params_checked + 4] == parseFloat(lat.value,10)) && (access[row][n_params_checked + 5] == parseFloat(lon.value,10))) {
+				//alert("access[row][n_params_checked + 5] = " + access[row][n_params_checked + 4]);
+				//alert("Found some in " + row + " row; access[row][lon] = " + access[row][n_params_checked + 5]);
+				var all_params = "";
+				for(var p = 0; p < n_params_checked; p++){
+					all_params = all_params + access[row][p + 1];
+				}
+				document.getElementById("exact_time_params").innerHTML = all_params;
+			}
+		}
+		//alert("Done!");
+		
+		/*turning the Globe
+			if (access[x_fin*delta][2]!=0){
+				turnH2Point = -1 * Math.atan(access[x_fin*delta][3] / (-1 * access[x_fin*delta][2]));
+				turnV2Point = Math.PI/2 - Math.acos(access[x_fin*delta][4]/7200.498);
+			}
+			else{ // z==0
+				turnH2Point = Math.atan(access[x_fin*delta][3] / (-1 * access[x_fin*delta][2]));
+				turnV2Point = 0;
+			}
+			if(access[x_fin*delta][2] >= 0){ // z<=0
+				turnH2Point -= Math.PI;
+			}
+			else if((access[x_fin*delta][2] <= 0) && (access[x_fin*delta][3] < 0)){ // z>=0 && x<0
+				turnH2Point -= 2.0*Math.PI;
+			}
+			
+			var backwardsRotationMatrix = mat4.create();
+			mat4.identity(backwardsRotationMatrix);
+			mat4.transpose(earthRotationMatrix, backwardsRotationMatrix);
+			mat4.multiply(backwardsRotationMatrix, earthRotationMatrix, earthRotationMatrix);
+			
+			var rotate2PointMatrix = mat4.create();
+			mat4.identity(rotate2PointMatrix);
+			mat4.rotate(rotate2PointMatrix, turnV2Point, [1, 0, 0]);
+			mat4.rotate(rotate2PointMatrix, turnH2Point, [0, 1, 0]);
+			mat4.multiply(rotate2PointMatrix, earthRotationMatrix, earthRotationMatrix);*/
+	}
+    
+    function markswitch(page_x) {
+        page = page_x;
+    }
+
+//-----------------------------------------------------------------------------------------------------------------------------------------	
+// WebGL Code!!! BEGIN
+	var gl2D;
+    var gl3D;
+
+    function initGL(canvas) {
+        try {
+			if(canvas.id == "interactiveEarth-canvas"){
+				gl3D = canvas.getContext("experimental-webgl");
+				gl3D.viewportWidth = canvas.width;
+				gl3D.viewportHeight = canvas.height;
+				if (!gl3D) {
+					alert("Could not initialise WebGL, sorry :-(");
+				}
+			}
+			if(canvas.id == "plainGraphic-canvas"){
+				gl2D = canvas.getContext('2d');
+				gl2D.viewportWidth = canvas.width;
+				gl2D.viewportHeight = canvas.height;
+				gl2D.clearRect ( 0 , 0 , gl2D.viewportWidth , gl2D.viewportHeight );
+				if (!gl2D) {
+					alert("Could not initialise 2d, sorry :-(");
+				}				
+			}
+        } catch (e) {
+        }
+    }
+
+
+    function getShader(gl, id) {
+        var shaderScript = document.getElementById(id);
+        if (!shaderScript) {
+            return null;
+        }
+
+        var str = "";
+        var k = shaderScript.firstChild;
+        while (k) {
+            if (k.nodeType == 3) {
+                str += k.textContent;
+            }
+            k = k.nextSibling;
+        }
+
+        var shader;
+        if (shaderScript.type == "x-shader/x-fragment") {
+            shader = gl.createShader(gl.FRAGMENT_SHADER);
+        } else if (shaderScript.type == "x-shader/x-vertex") {
+            shader = gl.createShader(gl.VERTEX_SHADER);
+        } else {
+            return null;
+        }
+
+        gl.shaderSource(shader, str);
+        gl.compileShader(shader);
+
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            alert(gl.getShaderInfoLog(shader));
+            return null;
+        }
+
+        return shader;
+    }
+
+    //--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    var currentProgram;
+    var shaderProgram;
+    var shaderProgram2;
+	var shaderProgram2D;
+
+    function initShaders() {
+        var fragmentShader = getShader(gl3D, "shader-fs");
+        var vertexShader = getShader(gl3D, "shader-vs");
+
+        shaderProgram = gl3D.createProgram();
+        gl3D.attachShader(shaderProgram, vertexShader);
+        gl3D.attachShader(shaderProgram, fragmentShader);
+        gl3D.linkProgram(shaderProgram);
+
+        if (!gl3D.getProgramParameter(shaderProgram, gl3D.LINK_STATUS)) {
+            alert("Could not initialise shaders");
+        }
+
+        gl3D.useProgram(shaderProgram);
+
+        shaderProgram.vertexPositionAttribute = gl3D.getAttribLocation(shaderProgram, "aVertexPosition");
+        gl3D.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+
+        shaderProgram.textureCoordAttribute = gl3D.getAttribLocation(shaderProgram, "aTextureCoord");
+        gl3D.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
+
+        shaderProgram.vertexNormalAttribute = gl3D.getAttribLocation(shaderProgram, "aVertexNormal");
+        gl3D.enableVertexAttribArray(shaderProgram.vertexNormalAttribute);
+
+        shaderProgram.pMatrixUniform = gl3D.getUniformLocation(shaderProgram, "uPMatrix");
+        shaderProgram.mvMatrixUniform = gl3D.getUniformLocation(shaderProgram, "uMVMatrix");
+        shaderProgram.nMatrixUniform = gl3D.getUniformLocation(shaderProgram, "uNMatrix");
+        shaderProgram.samplerUniform = gl3D.getUniformLocation(shaderProgram, "uSampler");
+        shaderProgram.useLightingUniform = gl3D.getUniformLocation(shaderProgram, "uUseLighting");
+        shaderProgram.ambientColorUniform = gl3D.getUniformLocation(shaderProgram, "uAmbientColor");
+        shaderProgram.lightingDirectionUniform = gl3D.getUniformLocation(shaderProgram, "uLightingDirection");
+        shaderProgram.directionalColorUniform = gl3D.getUniformLocation(shaderProgram, "uDirectionalColor");
+
+        //SHADERS 2!!!
+        var fragmentShader2 = getShader(gl3D, "shader-fs2");
+        var vertexShader2 = getShader(gl3D, "shader-vs2");
+
+        shaderProgram2 = gl3D.createProgram();
+        gl3D.attachShader(shaderProgram2, vertexShader2);
+        gl3D.attachShader(shaderProgram2, fragmentShader2);
+        gl3D.linkProgram(shaderProgram2);
+
+        if (!gl3D.getProgramParameter(shaderProgram2, gl3D.LINK_STATUS)) {
+            alert("Could not initialise shaders");
+        }
+
+        gl3D.useProgram(shaderProgram2);
+
+        shaderProgram2.vertexPositionAttribute = gl3D.getAttribLocation(shaderProgram2, "aVertexPosition");
+        gl3D.enableVertexAttribArray(shaderProgram2.vertexPositionAttribute);
+
+        shaderProgram2.vertexColorAttribute = gl3D.getAttribLocation(shaderProgram2, "aVertexColor");
+        gl3D.enableVertexAttribArray(shaderProgram2.vertexColorAttribute);
+
+        shaderProgram2.vertexNormalAttribute = gl3D.getAttribLocation(shaderProgram2, "aVertexNormal");
+        gl3D.enableVertexAttribArray(shaderProgram2.vertexNormalAttribute);
+
+        shaderProgram2.pMatrixUniform = gl3D.getUniformLocation(shaderProgram2, "uPMatrix");
+        shaderProgram2.mvMatrixUniform = gl3D.getUniformLocation(shaderProgram2, "uMVMatrix");
+        shaderProgram2.nMatrixUniform = gl3D.getUniformLocation(shaderProgram2, "uNMatrix");
+        shaderProgram2.samplerUniform = gl3D.getUniformLocation(shaderProgram2, "uSampler");
+        shaderProgram2.useLightingUniform = gl3D.getUniformLocation(shaderProgram2, "uUseLighting");
+        shaderProgram2.ambientColorUniform = gl3D.getUniformLocation(shaderProgram2, "uAmbientColor");
+        shaderProgram2.lightingDirectionUniform = gl3D.getUniformLocation(shaderProgram2, "uLightingDirection");
+        shaderProgram2.directionalColorUniform = gl3D.getUniformLocation(shaderProgram2, "uDirectionalColor");
+    }
+
+
+    function handleLoadedTexture(texture) {
+        gl3D.pixelStorei(gl3D.UNPACK_FLIP_Y_WEBGL, true);
+        gl3D.bindTexture(gl3D.TEXTURE_2D, texture); // texture - is the “current” texture
+        gl3D.texImage2D(gl3D.TEXTURE_2D, 0, gl3D.RGBA, gl3D.RGBA, gl3D.UNSIGNED_BYTE, texture.image); //upload the freshly-loaded image to the texture’s space in the graphics card
+        gl3D.texParameteri(gl3D.TEXTURE_2D, gl3D.TEXTURE_MAG_FILTER, gl3D.LINEAR); //to specify special scaling parameters for the texture
+        gl3D.texParameteri(gl3D.TEXTURE_2D, gl3D.TEXTURE_MIN_FILTER, gl3D.LINEAR_MIPMAP_NEAREST); //to specify special scaling parameters for the texture
+        gl3D.generateMipmap(gl3D.TEXTURE_2D);
+
+        gl3D.bindTexture(gl3D.TEXTURE_2D, null); // to set the current texture to null
+    }
+
+    var earthTexture;
+    var tileTexture;
+    function initTexture() {
+        earthTexture = gl3D.createTexture();
+        earthTexture.image = new Image();
+        earthTexture.image.onload = function () {
+            handleLoadedTexture(earthTexture)
+        }
+        earthTexture.image.crossOrigin = "anonymous";
+        //earthTexture.image.src = "img/earth-map-huge_2pow_2048_1024.jpg";
+		earthTexture.image.src = "https://lh3.googleusercontent.com/-DlGD751kCwE/T8yEYgGZ7UI/AAAAAAAAChs/4WOqafY0esQ/s1024/earth-map-_2pow_1024_256.jpg";
+    }
+
+    var mvMatrix = mat4.create();
+    var mvMatrixStack = [];
+    var pMatrix = mat4.create();
+    function mvPushMatrix() {
+        var copy = mat4.create();
+        mat4.set(mvMatrix, copy);
+        mvMatrixStack.push(copy);
+    }
+
+    function mvPopMatrix() {
+        if (mvMatrixStack.length == 0) {
+            throw "Invalid popMatrix!";
+        }
+        mvMatrix = mvMatrixStack.pop();
+    }
+
+    function setMatrixUniforms() {
+        gl3D.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
+        gl3D.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+
+        var normalMatrix = mat3.create();
+        mat4.toInverseMat3(mvMatrix, normalMatrix);
+        mat3.transpose(normalMatrix);
+        gl3D.uniformMatrix3fv(shaderProgram.nMatrixUniform, false, normalMatrix);
+
+        //SHADERS 2
+        gl3D.uniformMatrix4fv(shaderProgram2.pMatrixUniform, false, pMatrix);
+        gl3D.uniformMatrix4fv(shaderProgram2.mvMatrixUniform, false, mvMatrix);
+
+        var normalMatrix2 = mat3.create();
+        mat4.toInverseMat3(mvMatrix, normalMatrix2);
+        mat3.transpose(normalMatrix2);
+        gl3D.uniformMatrix3fv(shaderProgram2.nMatrixUniform, false, normalMatrix2);
+    }
+
+
+    function degToRad(degrees) {
+        return degrees * Math.PI / 180;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+    var mouseDown = false;
+    var lastMouseX = null;
+    var lastMouseY = null;
+
+    var earthRotationMatrix = mat4.create();
+    mat4.identity(earthRotationMatrix);
+
+    function handleMouseDown(event) {
+        mouseDown = true;
+        lastMouseX = event.clientX;
+        lastMouseY = event.clientY;
+    }
+
+    function handleMouseUp(event) {
+        mouseDown = false;
+    }
+
+    function handleMouseMove(event) {
+        if (!mouseDown) {
+            return;
+        }
+        var newX = event.clientX;
+        var newY = event.clientY;
+
+        var deltaX = newX - lastMouseX
+        var newRotationMatrix = mat4.create();
+        mat4.identity(newRotationMatrix);
+        mat4.rotate(newRotationMatrix, degToRad(deltaX / 10), [0, 1, 0]);
+
+        var deltaY = newY - lastMouseY;
+        mat4.rotate(newRotationMatrix, degToRad(deltaY / 10), [1, 0, 0]);
+
+        mat4.multiply(newRotationMatrix, earthRotationMatrix, earthRotationMatrix);
+
+        lastMouseX = newX
+        lastMouseY = newY;
+    }
+
+    function handleKeyDown(event) {
+        var pressed_key = event.keyCode;
+        if ((pressed_key == 187) || (pressed_key == 107)) { // "+"
+            // Zoom in
+            //alert("Zoom in: event.keyCode = " + event.keyCode);
+            far_dist += 2000;
+        }
+        else if ((pressed_key == 189) || (pressed_key == 109)) { // "-"
+            // Zoom out
+            //alert("Zoom out: event.keyCode = " + event.keyCode);
+            far_dist -= 2000;
+        }
+		else if (pressed_key == 70){ // "f"
+            // "Return to the initial turn"
+            //alert("Zoom out: event.keyCode = " + event.keyCode);
+            var newRotationMatrix = mat4.create();
+			mat4.identity(newRotationMatrix);
+			mat4.transpose(earthRotationMatrix, newRotationMatrix);
+			mat4.multiply(newRotationMatrix, earthRotationMatrix, earthRotationMatrix);
+        };
+        //else alert("Unknown: event.keyCode = " + event.keyCode);
+    }
+
+    //------------------------------------------------------------------------------------------------------------
+
+    var earthVertexPositionBuffer;
+    var earthVertexNormalBuffer;
+    var earthVertexTextureCoordBuffer;
+    var earthVertexIndexBuffer;
+
+    var points3DDataVertexPositionBuffer;
+    var points3DDataVertexIndexBuffer;
+    var points3DDataVertexColorBuffer;
+	
+	var SatelliteVertexPositionBuffer;
+    var SatelliteVertexIndexBuffer;
+    var SatelliteVertexColorBuffer;
+	var indexSatellite;
+	var colorsSatellite;
+	var verticesSatellite;
+    function initBuffers() {
+        var latitudeBands = 30;
+        var longitudeBands = 30;
+
+        var vertexPositionData = [];
+        var normalData = [];
+        var textureCoordData = [];
+        for (var latNumber = 0; latNumber <= latitudeBands; latNumber++) {
+            var theta = latNumber * Math.PI / latitudeBands;
+            var sinTheta = Math.sin(theta);
+            var cosTheta = Math.cos(theta);
+
+            for (var longNumber = 0; longNumber <= longitudeBands; longNumber++) {
+                var phi = longNumber * 2 * Math.PI / longitudeBands;
+                var sinPhi = Math.sin(phi);
+                var cosPhi = Math.cos(phi);
+
+                var x = cosPhi * sinTheta;
+                var y = cosTheta;
+                var z = sinPhi * sinTheta;
+                var u = 1 - (longNumber / longitudeBands);
+                var v = 1 - (latNumber / latitudeBands);
+
+                normalData.push(x);
+                normalData.push(y);
+                normalData.push(z);
+                textureCoordData.push(u);
+                textureCoordData.push(v);
+                vertexPositionData.push(radius * x);
+                vertexPositionData.push(radius * y);
+                vertexPositionData.push(radius * z);
+            }
+        }
+
+        var indexData = [];
+        for (var latNumber = 0; latNumber < latitudeBands; latNumber++) {
+            for (var longNumber = 0; longNumber < longitudeBands; longNumber++) {
+                var first = (latNumber * (longitudeBands + 1)) + longNumber;
+                var second = first + longitudeBands + 1;
+                indexData.push(first);
+                indexData.push(second);
+                indexData.push(first + 1);
+
+                indexData.push(second);
+                indexData.push(second + 1);
+                indexData.push(first + 1);
+            }
+        }
+
+        earthVertexNormalBuffer = gl3D.createBuffer();
+        gl3D.bindBuffer(gl3D.ARRAY_BUFFER, earthVertexNormalBuffer);
+        gl3D.bufferData(gl3D.ARRAY_BUFFER, new Float32Array(normalData), gl3D.STATIC_DRAW);
+        earthVertexNormalBuffer.itemSize = 3;
+        earthVertexNormalBuffer.numItems = normalData.length / 3;
+
+        earthVertexTextureCoordBuffer = gl3D.createBuffer();
+        gl3D.bindBuffer(gl3D.ARRAY_BUFFER, earthVertexTextureCoordBuffer);
+        gl3D.bufferData(gl3D.ARRAY_BUFFER, new Float32Array(textureCoordData), gl3D.STATIC_DRAW);
+        earthVertexTextureCoordBuffer.itemSize = 2;
+        earthVertexTextureCoordBuffer.numItems = textureCoordData.length / 2;
+
+        earthVertexPositionBuffer = gl3D.createBuffer();
+        gl3D.bindBuffer(gl3D.ARRAY_BUFFER, earthVertexPositionBuffer);
+        gl3D.bufferData(gl3D.ARRAY_BUFFER, new Float32Array(vertexPositionData), gl3D.STATIC_DRAW);
+        earthVertexPositionBuffer.itemSize = 3;
+        earthVertexPositionBuffer.numItems = vertexPositionData.length / 3;
+
+        earthVertexIndexBuffer = gl3D.createBuffer();
+        gl3D.bindBuffer(gl3D.ELEMENT_ARRAY_BUFFER, earthVertexIndexBuffer);
+        gl3D.bufferData(gl3D.ELEMENT_ARRAY_BUFFER, new Uint16Array(indexData), gl3D.STATIC_DRAW);
+        earthVertexIndexBuffer.itemSize = 1;
+        earthVertexIndexBuffer.numItems = indexData.length;
+
+        //points3DDataSection----------------------------------------------------------------------
+        points3DDataVertexPositionBuffer = gl3D.createBuffer();
+        gl3D.bindBuffer(gl3D.ARRAY_BUFFER, points3DDataVertexPositionBuffer);
+
+        vertices = [
+        // Front face
+		 0.0, 50.0, 0.0,
+		-50.0, -50.0, 50.0,
+		 50.0, -50.0, 50.0,
+
+        // Right face
+		 0.0, 50.0, 0.0,
+		 50.0, -50.0, 50.0,
+		 50.0, -50.0, -50.0,
+
+        // Back face
+		 0.0, 50.0, 0.0,
+		 50.0, -50.0, -50.0,
+		-50.0, -50.0, -50.0,
+
+        // Left face
+		 0.0, 50.0, 0.0,
+		-50.0, -50.0, -50.0,
+		-50.0, -50.0, 50.0
+	];
+
+        gl3D.bufferData(gl3D.ARRAY_BUFFER, new Float32Array(vertices), gl3D.STATIC_DRAW);
+        points3DDataVertexPositionBuffer.itemSize = 3;
+        points3DDataVertexPositionBuffer.numItems = 12;
+
+        points3DDataVertexColorBuffer = gl3D.createBuffer();
+        gl3D.bindBuffer(gl3D.ARRAY_BUFFER, points3DDataVertexColorBuffer);
+        var colors = [
+        // Front face
+		 1.0, 0.0, 1.0, 1.0,
+		 1.0, 0.0, 1.0, 1.0,
+		 1.0, 0.0, 1.0, 1.0,
+
+        // Right face
+		 1.0, 1.0, 1.0, 1.0,
+		 1.0, 0.0, 1.0, 1.0,
+		 1.0, 1.0, 1.0, 1.0,
+
+        // Back face
+		 0.0, 0.0, 1.0, 1.0,
+		 1.0, 0.0, 0.0, 1.0,
+		 1.0, 0.0, 1.0, 1.0,
+
+        // Left face
+		 0.0, 1.0, 1.0, 1.0,
+		 0.0, 1.0, 1.0, 1.0,
+		 1.0, 0.0, 1.0, 1.0
+	];
+        gl3D.bufferData(gl3D.ARRAY_BUFFER, new Float32Array(colors), gl3D.STATIC_DRAW);
+        points3DDataVertexColorBuffer.itemSize = 4;
+        points3DDataVertexColorBuffer.numItems = 12;
+
+        var indexData2 = [0, 1, 2, 3];
+        points3DDataVertexIndexBuffer = gl3D.createBuffer();
+        gl3D.bindBuffer(gl3D.ELEMENT_ARRAY_BUFFER, points3DDataVertexIndexBuffer);
+        gl3D.bufferData(gl3D.ELEMENT_ARRAY_BUFFER, new Uint16Array(indexData2), gl3D.STATIC_DRAW);
+        points3DDataVertexIndexBuffer.itemSize = 1;
+        points3DDataVertexIndexBuffer.numItems = indexData2.length;
+    
+		//-----------------------------------------------------------
+		// Plain Graphic Section
+		plainGraphVertexPositionBuffer = gl3D.createBuffer();
+        gl3D.bindBuffer(gl3D.ARRAY_BUFFER, plainGraphVertexPositionBuffer);
+
+        var vertices3 = [0,0];
+
+        gl3D.bufferData(gl3D.ARRAY_BUFFER, new Float32Array(vertices3), gl3D.STATIC_DRAW);
+        plainGraphVertexPositionBuffer.itemSize = 2;
+        plainGraphVertexPositionBuffer.numItems = vertices3.length / plainGraphVertexPositionBuffer.itemSize;
+
+        plainGraphVertexColorBuffer = gl3D.createBuffer();
+        gl3D.bindBuffer(gl3D.ARRAY_BUFFER, plainGraphVertexColorBuffer);
+        var colors3 = [0,1,0,1];
+        gl3D.bufferData(gl3D.ARRAY_BUFFER, new Float32Array(colors3), gl3D.STATIC_DRAW);
+        plainGraphVertexColorBuffer.itemSize = 4;
+        plainGraphVertexColorBuffer.numItems = colors3.length / plainGraphVertexColorBuffer.itemSize;
+
+        var indexData3 = [0];
+        plainGraphVertexIndexBuffer = gl3D.createBuffer();
+        gl3D.bindBuffer(gl3D.ELEMENT_ARRAY_BUFFER, plainGraphVertexIndexBuffer);
+        gl3D.bufferData(gl3D.ELEMENT_ARRAY_BUFFER, new Uint16Array(indexData3), gl3D.STATIC_DRAW);
+        plainGraphVertexIndexBuffer.itemSize = 1;
+        plainGraphVertexIndexBuffer.numItems = indexData3.length;
+		
+		//SatelliteSection----------------------------------------------------------------------
+        SatelliteVertexPositionBuffer = gl3D.createBuffer();
+        gl3D.bindBuffer(gl3D.ARRAY_BUFFER, SatelliteVertexPositionBuffer);
+
+        verticesSatellite = [
+        // Front face
+		 0.0, 50.0, 0.0,
+		-50.0, -50.0, 50.0,
+		 50.0, -50.0, 50.0,
+
+        // Right face
+		 0.0, 50.0, 0.0,
+		 50.0, -50.0, 50.0,
+		 50.0, -50.0, -50.0,
+
+        // Back face
+		 0.0, 50.0, 0.0,
+		 50.0, -50.0, -50.0,
+		-50.0, -50.0, -50.0,
+
+        // Left face
+		 0.0, 50.0, 0.0,
+		-50.0, -50.0, -50.0,
+		-50.0, -50.0, 50.0
+		];
+
+        gl3D.bufferData(gl3D.ARRAY_BUFFER, new Float32Array(verticesSatellite), gl3D.STATIC_DRAW);
+        SatelliteVertexPositionBuffer.itemSize = 3;
+        SatelliteVertexPositionBuffer.numItems = 12;
+
+        SatelliteVertexColorBuffer = gl3D.createBuffer();
+        gl3D.bindBuffer(gl3D.ARRAY_BUFFER, SatelliteVertexColorBuffer);
+        colorsSatellite = [
+        // Front face
+		 1.0, 1.0, 1.0, 1.0,
+		 1.0, 1.0, 1.0, 1.0,
+		 1.0, 1.0, 1.0, 1.0,
+
+        // Right face
+		 1.0, 1.0, 1.0, 1.0,
+		 1.0, 1.0, 1.0, 1.0,
+		 1.0, 1.0, 1.0, 1.0,
+
+        // Back face
+		 1.0, 1.0, 1.0, 1.0,
+		 1.0, 1.0, 1.0, 1.0,
+		 1.0, 1.0, 1.0, 1.0,
+
+        // Left face
+		 1.0, 1.0, 1.0, 1.0,
+		 1.0, 1.0, 1.0, 1.0,
+		 1.0, 1.0, 1.0, 1.0
+		];
+        gl3D.bufferData(gl3D.ARRAY_BUFFER, new Float32Array(colorsSatellite), gl3D.STATIC_DRAW);
+        SatelliteVertexColorBuffer.itemSize = 4;
+        SatelliteVertexColorBuffer.numItems = 12;
+
+        indexSatellite = [0, 1, 2, 3];
+        SatelliteVertexIndexBuffer = gl3D.createBuffer();
+        gl3D.bindBuffer(gl3D.ELEMENT_ARRAY_BUFFER, SatelliteVertexIndexBuffer);
+        gl3D.bufferData(gl3D.ELEMENT_ARRAY_BUFFER, new Uint16Array(indexSatellite), gl3D.STATIC_DRAW);
+        SatelliteVertexIndexBuffer.itemSize = 1;
+        SatelliteVertexIndexBuffer.numItems = indexSatellite.length;
+    }
+
+    //-------------------------------------------------------------------------------------------------------------
+
+    function drawGlobe() {
+        gl3D.viewport(0, 0, gl3D.viewportWidth, gl3D.viewportHeight);
+        gl3D.clear(gl3D.COLOR_BUFFER_BIT | gl3D.DEPTH_BUFFER_BIT);
+
+        // background distance
+        mat4.perspective(45, gl3D.viewportWidth / gl3D.viewportHeight, 0.1, 80000.0, pMatrix);
+        gl3D.useProgram(shaderProgram);
+
+		lightingTheGlobe();
+        
+        mat4.identity(mvMatrix);
+
+        // from what distance we observe the scene
+        mat4.translate(mvMatrix, [0, 0, far_dist]);
+
+        mat4.multiply(mvMatrix, earthRotationMatrix);
+
+		// initial turn
+		if(turnV < 2.7){
+			turnV = turnV + 0.01;
+			turnH = turnH + 0.008;
+			var backwardsRotationMatrix = mat4.create();
+			mat4.identity(backwardsRotationMatrix);
+			mat4.rotate(backwardsRotationMatrix, degToRad(turnH / 10), [0, 1, 0]);
+			mat4.rotate(backwardsRotationMatrix, degToRad(turnV / 10), [1, 0, 0]);
+			mat4.multiply(backwardsRotationMatrix, earthRotationMatrix, earthRotationMatrix);
+		}
+		else 
+		
+		//turn the Globe when time moment is chosen
+		/*if(turnV2Point != 0 || turnH2Point != 0){
+			var backwardsRotationMatrix = mat4.create();
+			mat4.identity(backwardsRotationMatrix);
+			mat4.transpose(earthRotationMatrix, backwardsRotationMatrix);
+			mat4.multiply(backwardsRotationMatrix, earthRotationMatrix, earthRotationMatrix);
+			
+			var rotate2PointMatrix = mat4.create();
+			mat4.identity(rotate2PointMatrix);
+			mat4.rotate(rotate2PointMatrix, turnH2Point, [0, 1, 0]);
+			mat4.rotate(rotate2PointMatrix, turnV2Point, [1, 0, 0]);
+			mat4.multiply(rotate2PointMatrix, earthRotationMatrix, earthRotationMatrix);
+			
+			turnH2Point = 0;
+			turnV2Point = 0;
+		}*/
+		
+        mvPushMatrix();
+        gl3D.activeTexture(gl3D.TEXTURE0);
+
+        gl3D.bindTexture(gl3D.TEXTURE_2D, earthTexture);
+        gl3D.uniform1i(shaderProgram.samplerUniform, 0);
+
+        gl3D.bindBuffer(gl3D.ARRAY_BUFFER, earthVertexPositionBuffer);
+        gl3D.vertexAttribPointer(shaderProgram.vertexPositionAttribute, earthVertexPositionBuffer.itemSize, gl3D.FLOAT, false, 0, 0);
+
+        gl3D.bindBuffer(gl3D.ARRAY_BUFFER, earthVertexTextureCoordBuffer);
+        gl3D.vertexAttribPointer(shaderProgram.textureCoordAttribute, earthVertexTextureCoordBuffer.itemSize, gl3D.FLOAT, false, 0, 0);
+
+        gl3D.bindBuffer(gl3D.ARRAY_BUFFER, earthVertexNormalBuffer);
+        gl3D.vertexAttribPointer(shaderProgram.vertexNormalAttribute, earthVertexNormalBuffer.itemSize, gl3D.FLOAT, false, 0, 0);
+
+        gl3D.bindBuffer(gl3D.ELEMENT_ARRAY_BUFFER, earthVertexIndexBuffer);
+        setMatrixUniforms();
+
+        //draw the Globe direct
+        gl3D.drawElements(gl3D.TRIANGLES, earthVertexIndexBuffer.numItems, gl3D.UNSIGNED_SHORT, 0);
+        mvPopMatrix();
+		if (light_R < 1.0){
+			light_R += 0.004;
+			light_G += 0.004;
+			light_B += 0.002;
+		}
+		if (ambient_B < 0.7){
+			ambient_R += 0.0002;
+			ambient_G += 0.001;
+			ambient_B += 0.002;
+		}
+    }
+
+	function lightingTheGlobe(){
+        gl3D.uniform1i(shaderProgram.useLightingUniform, true);
+        gl3D.uniform3f(
+			shaderProgram.ambientColorUniform,
+			0.25,
+			0.4,
+			0.7
+		);
+		var lightingDirection = [
+			-1,
+			-1,
+			-1
+		];
+        var adjustedLD = vec3.create();
+        vec3.normalize(lightingDirection, adjustedLD);
+        vec3.scale(adjustedLD, -1);
+        gl3D.uniform3fv(shaderProgram.lightingDirectionUniform, adjustedLD);
+		gl3D.uniform3f(
+			shaderProgram.directionalColorUniform,
+			/*1.0,
+			1.0,
+			0.5*/
+			light_R,
+			light_G,
+			light_B
+		);
+	}
+	
+    //------------------------------------------------------------------------------------------------------------------------------------
+
+    function drawPoints3DData(points, color, indexData) {
+        count_drawPoints3DData++;
+        if (access.length > 3) {
+            mvPushMatrix();
+
+            gl3D.useProgram(shaderProgram2);
+
+            //Blending Section =>
+            gl3D.blendFunc(gl3D.SRC_ALPHA, gl3D.ONE);
+            gl3D.enable(gl3D.BLEND);
+            gl3D.uniform1f(shaderProgram2.alphaUniform, 1.0);
+            //<= Blending Section
+
+            gl3D.bindBuffer(gl3D.ARRAY_BUFFER, points3DDataVertexPositionBuffer);
+            gl3D.bufferData(gl3D.ARRAY_BUFFER, new Float32Array(points), gl3D.STATIC_DRAW);
+            gl3D.vertexAttribPointer(shaderProgram2.vertexPositionAttribute, points3DDataVertexPositionBuffer.itemSize, gl3D.FLOAT, false, 0, 0);
+            points3DDataVertexPositionBuffer.numItems = points.length / 3;
+
+            gl3D.bindBuffer(gl3D.ARRAY_BUFFER, points3DDataVertexColorBuffer);
+            gl3D.bufferData(gl3D.ARRAY_BUFFER, new Float32Array(color), gl3D.STATIC_DRAW);
+            points3DDataVertexColorBuffer.numItems = color.length / 4;
+            gl3D.vertexAttribPointer(shaderProgram2.vertexColorAttribute, points3DDataVertexColorBuffer.itemSize, gl3D.FLOAT, false, 0, 0);
+
+            gl3D.bindBuffer(gl3D.ELEMENT_ARRAY_BUFFER, points3DDataVertexIndexBuffer);
+            gl3D.bufferData(gl3D.ELEMENT_ARRAY_BUFFER, new Uint16Array(indexData), gl3D.STATIC_DRAW);
+            points3DDataVertexIndexBuffer.itemSize = 1;
+            points3DDataVertexIndexBuffer.numItems = indexData.length;
+
+            setMatrixUniforms();
+
+            //gl3D.drawArrays(gl3D.TRIANGLES, 0, points3DDataVertexPositionBuffer.numItems);
+            gl3D.drawElements(gl3D.LINE_STRIP, points3DDataVertexIndexBuffer.numItems, gl3D.UNSIGNED_SHORT, 0);
+            mvPopMatrix();
+
+            gl3D.disable(gl3D.BLEND);
+            gl3D.enable(gl3D.DEPTH_TEST);
+        }
+        else {
+            alert("In drawPoints3DData access.length <= 3!!!");
+        }
+    }
+
+	function drawSatellite(points,axe) {
+        if (access.length > 3) {
+            mvPushMatrix();
+
+            gl3D.useProgram(shaderProgram2);
+
+            //Blending Section =>
+            gl3D.blendFunc(gl3D.SRC_ALPHA, gl3D.ONE);
+            gl3D.enable(gl3D.BLEND);
+            gl3D.uniform1f(shaderProgram2.alphaUniform, 1.0);
+            //<= Blending Section
+
+            gl3D.bindBuffer(gl3D.ARRAY_BUFFER, SatelliteVertexPositionBuffer);
+            gl3D.bufferData(gl3D.ARRAY_BUFFER, new Float32Array(points), gl3D.STATIC_DRAW);
+            gl3D.vertexAttribPointer(shaderProgram2.vertexPositionAttribute, SatelliteVertexPositionBuffer.itemSize, gl3D.FLOAT, false, 0, 0);
+            SatelliteVertexPositionBuffer.numItems = points.length / 3;
+
+			if(axe == 0) colorsSatellite = [ // x-axe blue
+				// Front face
+				 0.0, 0.0, 1.0, 1.0,
+				 0.0, 0.0, 1.0, 1.0,
+				 0.0, 0.0, 1.0, 1.0,
+
+				// Right face
+				 0.0, 0.0, 1.0, 1.0,
+				 0.0, 0.0, 1.0, 1.0,
+				 0.0, 0.0, 1.0, 1.0,
+
+				// Back face
+				 0.0, 0.0, 1.0, 1.0,
+				 0.0, 0.0, 1.0, 1.0,
+				 0.0, 0.0, 1.0, 1.0,
+
+				// Left face
+				 0.0, 0.0, 1.0, 1.0,
+				 0.0, 0.0, 1.0, 1.0,
+				 0.0, 0.0, 1.0, 1.0
+				];
+			else if(axe == 1) colorsSatellite = [ // y-axe red
+				// Front face
+				 1.0, 0.0, 0.0, 1.0,
+				 1.0, 0.0, 0.0, 1.0,
+				 1.0, 0.0, 0.0, 1.0,
+
+				// Right face
+				 1.0, 0.0, 0.0, 1.0,
+				 1.0, 0.0, 0.0, 1.0,
+				 1.0, 0.0, 0.0, 1.0,
+
+				// Back face
+				 1.0, 0.0, 0.0, 1.0,
+				 1.0, 0.0, 0.0, 1.0,
+				 1.0, 0.0, 0.0, 1.0,
+
+				// Left face
+				 1.0, 0.0, 0.0, 1.0,
+				 1.0, 0.0, 0.0, 1.0,
+				 1.0, 0.0, 0.0, 1.0
+				];
+			else if(axe == 2) colorsSatellite = [ // z-axe green
+				// Front face
+				 0.0, 1.0, 0.0, 1.0,
+				 0.0, 1.0, 0.0, 1.0,
+				 0.0, 1.0, 0.0, 1.0,
+
+				// Right face
+				 0.0, 1.0, 0.0, 1.0,
+				 0.0, 1.0, 0.0, 1.0,
+				 0.0, 1.0, 0.0, 1.0,
+
+				// Back face
+				 0.0, 1.0, 0.0, 1.0,
+				 0.0, 1.0, 0.0, 1.0,
+				 0.0, 1.0, 0.0, 1.0,
+
+				// Left face
+				 0.0, 1.0, 0.0, 1.0,
+				 0.0, 1.0, 0.0, 1.0,
+				 0.0, 1.0, 0.0, 1.0
+				];
+			if(axe == 3) colorsSatellite = [ // satellite
+				// Front face
+				 1.0, 1.0, 1.0, 1.0,
+				 1.0, 1.0, 1.0, 1.0,
+				 1.0, 1.0, 1.0, 1.0,
+
+				// Right face
+				 1.0, 1.0, 1.0, 1.0,
+				 1.0, 1.0, 1.0, 1.0,
+				 1.0, 1.0, 1.0, 1.0,
+
+				// Back face
+				 1.0, 1.0, 1.0, 1.0,
+				 1.0, 1.0, 1.0, 1.0,
+				 1.0, 1.0, 1.0, 1.0,
+
+				// Left face
+				 1.0, 1.0, 1.0, 1.0,
+				 1.0, 1.0, 1.0, 1.0,
+				 1.0, 1.0, 1.0, 1.0
+				];
+            gl3D.bindBuffer(gl3D.ARRAY_BUFFER, SatelliteVertexColorBuffer);
+            gl3D.bufferData(gl3D.ARRAY_BUFFER, new Float32Array(colorsSatellite), gl3D.STATIC_DRAW);
+            SatelliteVertexColorBuffer.numItems = colorsSatellite.length / 4;
+            gl3D.vertexAttribPointer(shaderProgram2.vertexColorAttribute, SatelliteVertexColorBuffer.itemSize, gl3D.FLOAT, false, 0, 0);
+
+            gl3D.bindBuffer(gl3D.ELEMENT_ARRAY_BUFFER, SatelliteVertexIndexBuffer);
+            gl3D.bufferData(gl3D.ELEMENT_ARRAY_BUFFER, new Uint16Array(indexSatellite), gl3D.STATIC_DRAW);
+            SatelliteVertexIndexBuffer.itemSize = 1;
+            SatelliteVertexIndexBuffer.numItems = indexSatellite.length;
+
+            setMatrixUniforms();
+            gl3D.drawElements(gl3D.TRIANGLES, SatelliteVertexIndexBuffer.numItems, gl3D.UNSIGNED_SHORT, 0);
+            mvPopMatrix();
+
+            gl3D.disable(gl3D.BLEND);
+            gl3D.enable(gl3D.DEPTH_TEST);
+        }
+        else {
+            alert("In drawPoints3DData access.length <= 3!!!");
+        }
+    }
+	
+    //-------------------------------------------------------------------------------------------------------------------------------------
+
+	function drawChannel_spectrum_yellow(cur_key) {
+        var points_arr = [];
+        var color_arr = [];
+        var alpha_arr = [];
+        var sum;
+        var index = 0;
+        for (var line = 0; line < access.length; line++) {
+			var level = access[line][interest_checked[cur_key]];
+            var level_log = Math.log(level) / Math.log(10.0);
+
+            if (level_log > max[cur_key]) {
+                //alert("The level is extremely high = " + level);
+                var red_level = 1;
+            }
+            else if (level_log > 0){
+				var red_level = Math.sin((Math.PI * level_log)/ (max[cur_key] * 2.0));
+				//var green_level = level_log / max[cur_key];
+				var green_level = Math.abs(1.0 / (2 * (level_log - max[cur_key] - 0.5)));
+				//var blue_level =  Math.cos((Math.PI * level_log )/ (2.0 * max[cur_key] * 0.75) - 0.75);
+				var blue_level =  Math.cos((Math.PI * level_log )/ max[cur_key])/2 + 0.5;
+            }
+			else if (level_log <= 0){
+			    var red_level =  Math.abs(1.0 / (level_log - 7));
+				var green_level =  Math.abs(1.0 / (level_log - 5));
+				var blue_level =  Math.abs(1.0 / (level_log - 1.0));
+			};            
+			
+			if ((red_level < 0.2) && (green_level < 0.2) && (blue_level < 0.2)){
+				red_level += 0.2;
+				green_level += 0.2;
+				blue_level += 0.2;
+				//alpha = 0.15;
+			} //sin((PI * x)/ 2.0) + 0.5 (x from 0 to 4)
+			
+			//var alpha = Math.sin(Math.PI * red_level / 2.0);
+			var alpha = red_level;
+			if (alpha < 0.9) alpha += 0.1;
+			
+            //drawPoints3DData(access[line_30][3],access[line_30][4],access[line_30][5],alpha);
+            points_arr.push(access[line][n_params_checked + 2], access[line][n_params_checked + 3], -1.0 * access[line][n_params_checked + 1]);
+            color_arr.push(Math.abs(red_level), Math.abs(green_level), Math.abs(blue_level), alpha);
+            alpha_arr.push(alpha);
+            indexData_pyr.push(index);
+            if((index > 800) || (line == access.length - 1)) {
+                drawPoints3DData(points_arr, color_arr, indexData_pyr);
+                points_arr = [];
+                color_arr = [];
+                alpha_arr = [];
+                indexData_pyr = [];
+                index = -1;
+            };
+            index++;
+        }
+        //drawPoints3DData();
+    }
+	
+	function drawChannel_spectrum(cur_key) {
+        var points_arr = [];
+        var color_arr = [];
+        var alpha_arr = [];
+        var sum;
+        var index = 0;
+        for (var line = 0; line < access.length; line++) {
+			var level = access[line][interest_checked[cur_key]];
+            var level_log = Math.log(level) / Math.log(10.0);
+
+            if (level_log > max[cur_key]) {
+                //alert("The level is extremely high = " + level);
+                var red_level = 1;
+            }
+            else if (level_log > 0){
+                var red_level = Math.sin(Math.PI * level_log / (2.0 * max[cur_key]));
+				var green_level = Math.sin(Math.PI * level_log / max[cur_key]);
+				var blue_level =  Math.cos(Math.PI * level_log / (2.0 * max[cur_key]));
+            }
+			else if (level_log <= 0){
+			    var red_level = Math.cos(level_log / (2.0 * max[cur_key]))/2;
+				var green_level = Math.cos(level_log / (2.0 * max[cur_key]))/2;
+				var blue_level =  Math.cos(level_log / (2.0 * max[cur_key]))/2;
+			};
+			
+            var alpha = red_level;
+			//if (alpha < 0.75) alpha += 0.25;
+			if ((alpha < 0.85) && (alpha > 0.2)) alpha += 0.15;
+			//else alpha = 1.0;
+			
+			if ((red_level < 0.1) && (green_level < 0.1) && (blue_level < 0.1)){
+				red_level = 0.65;
+				green_level = 0.65;
+				blue_level = 0.65;
+				//alpha = 0.15;
+			}
+			
+            //drawPoints3DData(access[line_30][3],access[line_30][4],access[line_30][5],alpha);
+            points_arr.push(access[line][n_params_checked + 2], access[line][n_params_checked + 3], -1.0 * access[line][n_params_checked + 1]);
+            color_arr.push(red_level, green_level, blue_level, alpha);
+            alpha_arr.push(alpha);
+            indexData_pyr.push(index);
+            if((index > 800) || (line == access.length - 1)) {
+                drawPoints3DData(points_arr, color_arr, indexData_pyr);
+                points_arr = [];
+                color_arr = [];
+                alpha_arr = [];
+                indexData_pyr = [];
+                index = -1;
+            };
+            index++;
+        }
+        //drawPoints3DData();
+    }
+	//------------------------------------------------------------------------------------------------------------------------------------------------
+	function Sample(key){
+		var canvas = document.getElementById("plainGraphic-canvas");
+		var context = canvas.getContext("2d");
+	
+		context.beginPath();
+		
+		// for db data version
+		if(access.length > canvas.width)
+			delta = Math.floor(access.length/canvas.width);
+		else
+			delta = 1;
+		for (var iter = 0; iter*delta < access.length; iter++){
+			//context.lineTo(iter, canvas.height - access[iter][1]);
+			context.lineTo(iter, canvas.height - (canvas.height * Math.log(access[iter*delta][1]) / Math.log(10.0))/ max[key]);
+		}
+		
+		context.lineWidth = 0.1;
+		context.strokeStyle = "#0000ff"; // line color
+		context.lineCap = "round";
+		canvas_arrow(context, 0, canvas.height, canvas.width, canvas.height);
+		canvas_arrow(context, 0, canvas.height, 0, 0);
+		axes_names(context, canvas.width, canvas.height);
+		context.stroke();
+		
+		// 30 sec Section
+		/*context.beginPath();	
+		context.lineWidth = 0.5;
+		context.strokeStyle = "#ff0000"; // line color
+		context.lineCap = "round";
+		if(access_30s.length > canvas.width)
+			delta = Math.floor(access.length/canvas.width);
+		else
+			delta = 1;
+		for (var iter = 0; iter*delta < access_30s.length; iter++){
+			context.lineTo(iter, canvas.height - (canvas.height * Math.log(access_30s[iter*delta][1]) / Math.log(10.0))/ max[key]);
+		}*/	
+		
+		context.lineWidth = 0.3;
+		context.strokeStyle = "#0000ff"; // line color
+		context.lineCap = "round";
+		canvas_arrow(context, 0, canvas.height, canvas.width, canvas.height);
+		canvas_arrow(context, 0, canvas.height, 0, 0);
+		axes_names(context, canvas.width, canvas.height);
+		context.stroke();
+	}
+	
+	function canvas_arrow(context, fromx, fromy, tox, toy){
+		var headlen = 10;   // length of head in pixels
+		var angle = Math.atan2(toy - fromy,tox - fromx);
+		context.moveTo(fromx, fromy);
+		context.lineTo(tox, toy);
+		context.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
+		context.moveTo(tox, toy);
+		context.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
+	}
+	
+	function axes_names(context, canvas_width, canvas_height){
+		context.fillStyle = "#000";
+		context.font = "7pt Arial";
+		
+		/*for (var iter = 0; iter < access.length; iter+=60){
+			context.fillText(access[iter][0].toString().substring(16,24), iter, canvas_height - 1);
+		}*/
+		var deltaTimeStamp = Math.floor(access.length / 7);
+		for (var iter = deltaTimeStamp; iter < access.length; iter=iter+deltaTimeStamp){
+			//context.fillText(access[iter][0].toString().substring(16,24), (canvas_width*iter)/(7*deltaTimeStamp), canvas_height - 1);
+			context.fillText(access[iter][0].toString().substring(11,24), (canvas_width*iter)/(7*deltaTimeStamp), canvas_height - 1);
+		}
+		
+		for (var key in interest_checked) {
+			for(var iter = 0; iter < max[key]; iter++){				
+				context.fillText(max[key] - iter, 0, canvas_height * (iter+1)/ (max[key]+1));
+			}
+		}
+	}
+	
+	Element.prototype.leftTopScreen = function () {
+        var x = this.offsetLeft;
+        var y = this.offsetTop;
+
+        var element = this.offsetParent;
+
+        while (element !== null) {
+            x = parseInt (x) + parseInt (element.offsetLeft);
+            y = parseInt (y) + parseInt (element.offsetTop);
+
+            element = element.offsetParent;
+        }
+
+        return new Array (x, y);
+    }
+
+    $(document).ready (function () {
+        var plain_canvas = document.getElementById ("plainGraphic-canvas");
+
+		xy = plain_canvas.leftTopScreen ();
+		
+        var context = plain_canvas.getContext ("2d");
+
+        context.fillStyle = "rgb(255,255,255)";   
+        context.fillRect (0, 0, plain_canvas.width, plain_canvas.height);
+		
+    });  
+//------------------------------------------------------------------------------------------------------------------------------------------------	
+	
+    function tick() {
+        requestAnimFrame(tick);
+        drawGlobe();
+        if (access.length > 3) {
+            for (var key in interest_checked) {
+                if ((interest_checked[key] > 0) && (key.substring(2) == "das4hrz")) {
+                    //drawChannel_spectrum(key);	
+					drawChannel_spectrum_yellow(key);
+					Sample(key);
+					if (pointsSatCurr.length > 0) drawSatellite(pointsSatCurr,3);
+					keyChosen = key;
+                };
+            };
+			/*
+			// draw x-end
+			drawSatellite([7200.498,0,0, 7200.498,0,-100, 7200.498,-100,0, 7100.498,0,0],0);
+			// draw y-end
+			drawSatellite([0,7200.498,0, 0,7200.498,-100, 0,7100.498,0, -100,7200.498,0],1);		
+			// draw Z-end
+			drawSatellite([0,0,7200.498, -100,0,7200.498, 0,-100,7200.498, 0,0,7100.498],2);*/
+		};
+    }
+
+//--------------------------------------------------------------------------------------------------------------------------------------------------	
+    function webGLStart() {
+        var canvas3D = document.getElementById("interactiveEarth-canvas");
+		var canvas2D = document.getElementById("plainGraphic-canvas");
+        initGL(canvas3D);
+		initGL(canvas2D);
+        initShaders();
+        initBuffers();
+        initTexture();
+
+        gl3D.clearColor(0.0, 0.02, 0.07, 1.0);
+        gl3D.enable(gl3D.DEPTH_TEST);
+
+		canvas3D.onmousedown = handleMouseDown;
+        document.onkeyup = handleKeyDown;
+		canvas3D.onmouseup = handleMouseUp;
+        canvas3D.onmousemove = handleMouseMove;
+		
+		var context = canvas2D.getContext ("2d");
+		
+		$(canvas2D).mousedown(function (event){
+			var x = event.clientX;
+            var y = event.clientY;
+
+            context.fillStyle = "rgb(255, 0, 0)";  
+			var x_fin = x - xy[0] + window.pageXOffset;
+			var y_fin = y - xy[1] + window.pageYOffset;
+			
+			var coord_box = document.getElementById("plainGraphic_coord");
+			var canvas2D = document.getElementById("plainGraphic-canvas");
+			
+			// db data version
+			if(x_fin*delta < access.length){
+				coord_box.innerHTML = "At " + access[x_fin*delta][0] + " the level was " + access[x_fin*delta][1];
+			}
+			else
+				alert("Incorrect logic in mousedown 2D");
+			
+			//turning the Globe
+			//coord_box.innerHTML += ".\nCoordinates of the chosen spot are: x = " + access[x_fin*delta][3] + "; y = " + access[x_fin*delta][4] + "; z = " + (-1 * access[x_fin*delta][2]);
+			coord_box.innerHTML += ".\nCoordinates of the chosen spot are: lat = " + access[x_fin*delta][5] + "; lon = " + access[x_fin*delta][6] + "; alt = " + access[x_fin*delta][7];
+			if (access[x_fin*delta][2]!=0){
+				/*turnH2Point = Math.atan(access[x_fin*delta][3] / (-1 * access[x_fin*delta][2]));
+				turnV2Point = Math.atan(90 - Math.sqrt(Math.pow(access[x_fin*delta][2],2)+Math.pow(access[x_fin*delta][3],2)) / access[x_fin*delta][4]);*/
+				turnH2Point = -1 * Math.atan(access[x_fin*delta][3] / (-1 * access[x_fin*delta][2]));
+				turnV2Point = Math.PI/2 - Math.acos(access[x_fin*delta][4]/7200.498);
+				/*if((access[x_fin*delta][2] > 0)&&(access[x_fin*delta][3] > 0)){//z<=0
+					turnH2Point = Math.PI - turnH2Point;
+				}*/
+			}
+			else{ // z==0
+				turnH2Point = Math.atan(access[x_fin*delta][3] / (-1 * access[x_fin*delta][2]));
+				turnV2Point = 0;
+			}
+			if(access[x_fin*delta][2] >= 0){ // z<=0
+				turnH2Point -= Math.PI;
+			}
+			else if((access[x_fin*delta][2] <= 0) && (access[x_fin*delta][3] < 0)){ // z>=0 && x<0
+				turnH2Point -= 2.0*Math.PI;
+			}
+			
+			var backwardsRotationMatrix = mat4.create();
+			mat4.identity(backwardsRotationMatrix);
+			mat4.transpose(earthRotationMatrix, backwardsRotationMatrix);
+			mat4.multiply(backwardsRotationMatrix, earthRotationMatrix, earthRotationMatrix);
+			
+			var rotate2PointMatrix = mat4.create();
+			mat4.identity(rotate2PointMatrix);
+			mat4.rotate(rotate2PointMatrix, turnV2Point, [1, 0, 0]);
+			mat4.rotate(rotate2PointMatrix, turnH2Point, [0, 1, 0]);
+			mat4.multiply(rotate2PointMatrix, earthRotationMatrix, earthRotationMatrix);
+			
+			
+			//coord_box.innerHTML += "; turnH2PointGrad = " + turnH2Point*180/Math.PI + "; turnV2PointGrad = " + turnV2Point*180/Math.PI;
+		
+			//drawing the Satellite
+			var pointsSat = [
+				(access[x_fin*delta][3]+100), (access[x_fin*delta][4]+100), (-1.0 * access[x_fin*delta][2]+100), 
+				(access[x_fin*delta][3]-100), parseInt(access[x_fin*delta][4]+200), (-1.0 * access[x_fin*delta][2]-100), 
+				parseInt(access[x_fin*delta][3]-100), (access[x_fin*delta][4]+100), (-1.0 * access[x_fin*delta][2]+100), 
+				parseInt(access[x_fin*delta][3]-100), parseInt(access[x_fin*delta][4]-100), (-1.0 * access[x_fin*delta][2]+100)
+			];
+			pointsSatCurr = pointsSat;
+			drawSatellite(pointsSat,3);			
+		});
+		
+		$(canvas2D).mousemove (function (event) {
+			var x = event.clientX;
+            var y = event.clientY;
+			var canvas2D = document.getElementById("plainGraphic-canvas");
+
+			context.clearRect(0, 0, canvas2D.width, canvas2D.height);
+			Sample(keyChosen); 
+			context.fillStyle = "rgb(255,165,0)";	
+			var x_draw = x - xy[0] + window.pageXOffset;
+			//var y_draw = y - xy[1] + window.pageYOffset;
+			var y_draw = event.offsetY;
+			/*if(x_draw < access.length){
+				// specification: context.fillRect(x, y, w, h)
+				context.fillRect(x_draw, 0, 1, canvas2D.height);
+				//context.fillRect(0, canvas2D.height - access[x_draw][1], canvas2D.width, 1);
+				context.fillRect(0, canvas2D.height - (canvas2D.height * Math.log(access[x_draw][1])/ Math.log(10.0))/ max[keyChosen], canvas2D.width, 1);
+				//context.fillRect(x_draw-2, parseInt(canvas2D.height - access[x_draw][1] - 2), 4, 4);
+				context.fillRect(x_draw-2, canvas2D.height - (canvas2D.height * Math.log(access[x_draw][1])/ Math.log(10.0))/ max[keyChosen] - 2, 4, 4);
+			}*/
+			if(x_draw < access.length){
+				context.fillRect(x_draw, 0, 1, canvas2D.height); //access[x_fin*delta][1]
+				context.fillRect(0, canvas2D.height - (canvas2D.height * Math.log(access[x_draw*delta][1])/ Math.log(10.0))/ max[keyChosen], canvas2D.width, 1);
+				context.fillRect(x_draw-2, canvas2D.height - (canvas2D.height * Math.log(access[x_draw*delta][1])/ Math.log(10.0))/ max[keyChosen] - 2, 4, 4);
+			}
+        });
+		
+		window.onresize = function(event){
+			var canvas2D = document.getElementById("plainGraphic-canvas");
+			xy = canvas2D.leftTopScreen ();
+			Sample();
+		};
+		
+		var ni = document.getElementById('Td2D');
+		var plain_coord = document.createElement('textarea');
+        plain_coord.setAttribute('id', 'plainGraphic_coord');
+        plain_coord.setAttribute('name', 'plain_coord');
+        plain_coord.setAttribute('COLS', '100');
+        plain_coord.setAttribute('ROWS', '6');
+        ni.appendChild(plain_coord);
+		
+        tick();
+    }
+	
+	// Begin: Calendar section-------------------------------->
+	function getObj(objID)
+	{
+		if (document.getElementById) {return document.getElementById(objID);}
+		else if (document.all) {return document.all[objID];}
+		else if (document.layers) {return document.layers[objID];}
+	}
+
+	function checkClick(e) {
+		e?evt=e:evt=event;
+		CSE=evt.target?evt.target:evt.srcElement;
+		if (getObj('fc'))
+			if (!isChild(CSE,getObj('fc')))
+				getObj('fc').style.display='none';
+	}
+
+	function isChild(s,d) {
+		while(s) {
+			if (s==d) 
+				return true;
+			s=s.parentNode;
+		}
+		return false;
+	}
+
+	function Left(obj)
+	{
+		var curleft = 0;
+		if (obj.offsetParent)
+		{
+			while (obj.offsetParent)
+			{
+				curleft += obj.offsetLeft
+				obj = obj.offsetParent;
+			}
+		}
+		else if (obj.x)
+			curleft += obj.x;
+		return curleft;
+	}
+
+	function Top(obj)
+	{
+		var curtop = 0;
+		if (obj.offsetParent)
+		{
+			while (obj.offsetParent)
+			{
+				curtop += obj.offsetTop
+				obj = obj.offsetParent;
+			}
+		}
+		else if (obj.y)
+			curtop += obj.y;
+		return curtop;
+	}
+
+	// Calendar script
+	var now = new Date;
+	var sccd=now.getDate();
+	var sccm=now.getMonth();
+	var sccy=now.getFullYear();
+	var ccm=now.getMonth();
+	var ccy=now.getFullYear();
+		 
+	document.write('<table id="fc" style="position:absolute;border-collapse:collapse;background:#FFFFFF;border:1px solid #303030;display:none;-moz-user-select:none;-khtml-user-select:none;user-select:none;" cellpadding=2>');
+	document.write('<tr style="font:bold 13px Arial"><td style="cursor:pointer;font-size:15px" onclick="csubm()">&laquo;</td><td colspan="5" id="mns" align="center"></td><td align="right" style="cursor:pointer;font-size:15px" onclick="caddm()">&raquo;</td></tr>');
+	document.write('<tr style="background:#FF9900;font:12px Arial;color:#FFFFFF"><td align=center>Ï</td><td align=center>Â</td><td align=center>Ñ</td><td align=center>×</td><td align=center>Ï</td><td align=center>Ñ</td><td align=center>Â</td></tr>');
+	for(var kk=1;kk<=6;kk++) {
+		document.write('<tr>');
+		for(var tt=1;tt<=7;tt++) {
+			num=7 * (kk-1) - (-tt);
+			document.write('<td id="v' + num + '" style="width:18px;height:18px">&nbsp;</td>');
+		}
+		document.write('</tr>');
+	}
+	document.write('<tr><td colspan="7" align="center" style="cursor:pointer;font:13px Arial;background:#FFC266" onclick="today()">Ñåãîäíÿ: '+addnull(sccd,sccm+1,sccy)+'</td></tr>');
+	document.write('</table>');
+
+	document.all?document.attachEvent('onclick',checkClick):document.addEventListener('click',checkClick,false);
+
+	
+	var updobj;
+	function lcs(ielem) {
+		updobj=ielem;
+		getObj('fc').style.left=Left(ielem);
+		getObj('fc').style.top=Top(ielem)+ielem.offsetHeight;
+		getObj('fc').style.display='';
+		
+		// First check date is valid
+		curdt=ielem.value;
+		curdtarr=curdt.split('-');
+		isdt=true;
+		for(var k=0;k<curdtarr.length;k++) {
+			if (isNaN(curdtarr[k]))
+				isdt=false;
+		}
+		if (isdt&(curdtarr.length==3)) {
+			ccm=curdtarr[1]-1;
+			ccy=curdtarr[2];
+			prepcalendar(curdtarr[0],curdtarr[1]-1,curdtarr[2]);
+		}		
+	}
+
+	function evtTgt(e)
+	{
+		var el;
+		if(e.target)el=e.target;
+		else if(e.srcElement)el=e.srcElement;
+		if(el.nodeType==3)el=el.parentNode; // defeat Safari bug
+		return el;
+	}
+	function EvtObj(e){if(!e)e=window.event;return e;}
+	function cs_over(e) {
+		evtTgt(EvtObj(e)).style.background='#FFEBCC';
+	}
+	function cs_out(e) {
+		evtTgt(EvtObj(e)).style.background='#FFFFFF';
+	}
+	function cs_click(e) {
+		updobj.value=calvalarr[evtTgt(EvtObj(e)).id.substring(1,evtTgt(EvtObj(e)).id.length)];
+		getObj('fc').style.display='none';
+	}
+
+	var mn=new Array('ßíâàðü','Ôåâðàëü','Ìàðò','Àïðåëü','Ìàé','Èþíü','Èþëü','Àâãóñò','Ñåíòðÿáðü','Îêòÿáðü','Íîÿáðü','Äåêàáðü');
+	var mnn=new Array('31','28','31','30','31','30','31','31','30','31','30','31');
+	var mnl=new Array('31','29','31','30','31','30','31','31','30','31','30','31');
+	var calvalarr=new Array(42);
+
+	function f_cps(obj) {
+		obj.style.background='#FFFFFF';
+		obj.style.font='10px Arial';
+		obj.style.color='#333333';
+		obj.style.textAlign='center';
+		obj.style.textDecoration='none';
+		obj.style.border='1px solid #606060';
+		obj.style.cursor='pointer';
+	}
+
+	function f_cpps(obj) {
+		obj.style.background='#C4D3EA';
+		obj.style.font='10px Arial';
+		obj.style.color='#FF9900';
+		obj.style.textAlign='center';
+		obj.style.textDecoration='line-through';
+		obj.style.border='1px solid #6487AE';
+		obj.style.cursor='default';
+	}
+
+	function f_hds(obj) {
+		obj.style.background='#FFF799';
+		obj.style.font='bold 10px Arial';
+		obj.style.color='#333333';
+		obj.style.textAlign='center';
+		obj.style.border='1px solid #6487AE';
+		obj.style.cursor='pointer';
+	}
+
+	// day selected
+	function prepcalendar (hd,cm,cy )
+	{
+		now=new Date();
+		sd=now.getDate();
+		td=new Date();
+		td.setDate(1);
+		td.setFullYear(cy);
+		td.setMonth(cm);
+		cd=td.getDay();
+		if (cd==0)cd=6; else cd--;
+		
+		getObj('mns').innerHTML=mn[cm]+ ' ' + cy;
+		
+		marr=((cy%4)==0)?mnl:mnn;
+		
+		for(var d=1;d<=42;d++)
+		{
+			f_cps ( getObj ( 'v' + parseInt ( d ) ) );
+			if ( ( d >= (cd -(-1) ) ) && ( d<=cd-(-marr[cm]) ) )
+			{
+				getObj('v'+parseInt(d)).onmouseover=cs_over;
+				getObj('v'+parseInt(d)).onmouseout=cs_out;
+				getObj('v'+parseInt(d)).onclick=cs_click;
+				
+				// if today
+				if (sccm == cm && sccd == (d-cd) && sccy == cy)
+					getObj('v'+parseInt(d)).style.color='#FF9900';
+
+				getObj('v'+parseInt(d)).innerHTML=d-cd;
+					
+				calvalarr[d]=addnull(d-cd,cm-(-1),cy);
+			}
+			else
+			{
+				getObj('v'+d).innerHTML='&nbsp;';
+				getObj('v'+parseInt(d)).onmouseover=null;
+				getObj('v'+parseInt(d)).onmouseout=null;
+				getObj('v'+parseInt(d)).onclick=null;
+				getObj('v'+parseInt(d)).style.cursor='default';
+			}
+		}
+	}
+
+	prepcalendar('',ccm,ccy);
+
+	function caddm() {
+		marr=((ccy%4)==0)?mnl:mnn;
+		
+		ccm+=1;
+		if (ccm>=12) {
+			ccm=0;
+			ccy++;
+		}
+		prepcalendar('',ccm,ccy);
+	}
+
+	function csubm() {
+		marr=((ccy%4)==0)?mnl:mnn;
+
+		ccm-=1;
+		if (ccm<0) {
+			ccm=11;
+			ccy--;
+		}
+		prepcalendar('',ccm,ccy);
+	}
+
+	function today() {
+		updobj.value=addnull(now.getDate(),now.getMonth()+1,now.getFullYear());
+		getObj('fc').style.display='none';
+		prepcalendar('',sccm,sccy);
+	}
+
+	function addnull(d,m,y)
+	{
+		var d0='',m0='';
+		if (d<10)d0='0';
+		if (m<10)m0='0';
+		
+		return d0+d+'-'+m0+m+'-'+y;
+	}
+	// End: Calendar section <--------------------------------------------
+
+</script>
+<h3 class="separator" align="center">Earth & Satellites 3D</h3>
+
+
+
+<!--<table>
+	<tr>
+		<td width="100%">
+			[<a shape="rect" id="Overview_caller" href="javascript:switchdiv('Overview')">_GENOVERVIEW_</a>]
+			[<a shape="rect" id="3dView_caller" href="javascript:switchsubdiv('3dView')">3dView</a>]
+		</td>
+	</tr>
+</table>
+-->
+<!--<div style="display:none" id="Overview">
+	<h3>Purpose</h3>
+	<p>To view the Earth and Satellites in 3D</p>
+</div>-->
+
+<!--<div style="display:none" id="3dView">-->
+<div id="3dView">
+	<table width="100%">
+		<tr>
+			<td valign="top" width="200px"> <!-- START OF THE LEFT COLUMN -->
+				<form action="/datanew.py/redirect" method="post" id="request_data">
+					<table border="0" width="100%">
+						<tr>
+							<td>From:
+								<input type="text" id="from_time" value="dd-mm-yy" onfocus="this.select();lcs(this)" onclick="event.cancelBubble=true;this.select();lcs(this)">
+								<select name="hour_from_select" id="hour_from_select">
+									<option value="00">00</option><option value="01">01</option><option value="02">02</option><option value="03">03</option>
+									<option value="04">04</option><option value="05">05</option><option value="06">06</option><option value="07">07</option>
+									<option value="08">08</option><option value="09">09</option><option value="10">10</option><option value="11">11</option>
+									<option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option>
+									<option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option>
+									<option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option>
+								</select> : 
+								<select name="minute_from_select" id="minute_from_select">
+									<option value="00">00</option><option value="01">01</option><option value="02">02</option><option value="03">03</option>
+									<option value="04">04</option><option value="05">05</option><option value="06">06</option><option value="07">07</option>
+									<option value="08">08</option><option value="09">09</option><option value="10">10</option><option value="11">11</option>
+									<option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option>
+									<option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option>
+									<option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option>
+									<option value="00">24</option><option value="01">25</option><option value="02">26</option><option value="03">27</option>
+									<option value="04">28</option><option value="05">29</option><option value="06">30</option><option value="07">31</option>
+									<option value="08">32</option><option value="09">33</option><option value="10">34</option><option value="11">35</option>
+									<option value="12">36</option><option value="13">37</option><option value="14">38</option><option value="15">39</option>
+									<option value="16">40</option><option value="17">41</option><option value="18">42</option><option value="19">43</option>
+									<option value="20">44</option><option value="21">45</option><option value="22">46</option><option value="23">47</option>
+									<option value="12">48</option><option value="13">49</option><option value="14">50</option><option value="15">51</option>
+									<option value="16">52</option><option value="17">53</option><option value="18">54</option><option value="19">55</option>
+									<option value="20">56</option><option value="21">57</option><option value="22">58</option><option value="23">59</option>
+								</select>
+								<!--<select name="xdy0" id="day_begin_select"></select>
+								<select name="xmn0" id="month_begin_select"><option value="01"></option></select>
+								<select name="xyr0" id="year_begin_select"><option value="2012"></option></select>
+								<select name="xhr0" id="hour_begin_select"><option value="00"></option></select>:
+								<select name="xmi0" id="minute_begin_select"><option value="00"></option></select>-->
+							</td>
+						</tr>
+						<tr>
+							<td> to:
+								<input type="text" id="to_time" value="dd-mm-yy" onfocus="this.select();lcs(this)" onclick="event.cancelBubble=true;this.select();lcs(this)">
+								<select name="hour_to_select" id="hour_to_select">
+									<option value="00">00</option><option value="01">01</option><option value="02">02</option><option value="03">03</option>
+									<option value="04">04</option><option value="05">05</option><option value="06">06</option><option value="07">07</option>
+									<option value="08">08</option><option value="09">09</option><option value="10">10</option><option value="11">11</option>
+									<option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option>
+									<option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option>
+									<option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option>
+								</select> : 
+								<select name="minute_to_select" id="minute_to_select">
+									<option value="00">00</option><option value="01">01</option><option value="02">02</option><option value="03">03</option>
+									<option value="04">04</option><option value="05">05</option><option value="06">06</option><option value="07">07</option>
+									<option value="08">08</option><option value="09">09</option><option value="10">10</option><option value="11">11</option>
+									<option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option>
+									<option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option>
+									<option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option>
+									<option value="00">24</option><option value="01">25</option><option value="02">26</option><option value="03">27</option>
+									<option value="04">28</option><option value="05">29</option><option value="06">30</option><option value="07">31</option>
+									<option value="08">32</option><option value="09">33</option><option value="10">34</option><option value="11">35</option>
+									<option value="12">36</option><option value="13">37</option><option value="14">38</option><option value="15">39</option>
+									<option value="16">40</option><option value="17">41</option><option value="18">42</option><option value="19">43</option>
+									<option value="20">44</option><option value="21">45</option><option value="22">46</option><option value="23">47</option>
+									<option value="12">48</option><option value="13">49</option><option value="14">50</option><option value="15">51</option>
+									<option value="16">52</option><option value="17">53</option><option value="18">54</option><option value="19">55</option>
+									<option value="20">56</option><option value="21">57</option><option value="22">58</option><option value="23">59</option>
+								</select>
+								<!--<select name="xdy1" id="day_end_select"><option value="02"></option></select>
+								<select name="xmn1" id="month_end_select"><option value="01"></option></select>
+								<select name="xyr1" id="year_end_select"><option value="2012"></option></select>
+								<select name="xhr1" id="hour_end_select"><option value="00"></option></select>:
+								<select name="xmi1" id="minute_end_select"><option value="00"></option></select>-->
+							</td>
+						</tr>
+
+						<tr><td><input type="radio" name="radioname" value="k1das4hrz" id="1das4hrz"/>
+						<label for="1das4hrz">Electrons E > 100 KeV, Protons 0.8-1 MeV (horizontal)</td></tr>
+						<tr><td><input type="radio" name="radioname" value="k2das4hrz" id="2das4hrz" checked="checked"/>
+						<label for="2das4hrz">Electrons E > 300 KeV (horizontal)</td></tr>
+
+						<tr><td><input type="radio" name="radioname" value="k9das4hrz" id="9das4hrz" />
+						<label for="9das4hrz">Protons 8-65 MeV (horizontal)</td></tr>
+
+						<tr><td style="display:none;"><input type="checkbox" name="kx" value="kx" id="x" checked="checked"/><label for="x">X [km]</label></td></tr>
+						<tr><td style="display:none;"><input type="checkbox" name="ky" value="ky" id="y" checked="checked"/><label for="y">Y [km]</label></td></tr>
+						<tr><td style="display:none;"><input type="checkbox" name="kz" value="kz" id="z" checked="checked"/><label for="z">Z [km]</label></td></tr>
+						<tr><td style="display:none;"><input type="checkbox" name="klat" value="klat" id="lat" checked="checked" hidden="true"/></td></tr>
+						<tr><td style="display:none;"><input type="checkbox" name="klon" value="klon" id="lon" checked="checked" hidden="true"/></td></tr>
+						<tr><td style="display:none;"><input type="checkbox" name="kalt" value="kalt" id="alt" checked="checked" hidden="true"/></td></tr>
+						
+						<tr><td class="separator"></td></tr>
+						<tr>
+							<td id="buttontdid" valign="top" align="left">
+								<input type="button" id="button_retrieve" value="RETRIEVE" onclick="javascript:retrieve_onclick(document.getElementById('request_data'));" />
+								<input type="button" id="button_getSource" value="Show data as a text" onclick="javascript:getSource_onclick(document.getElementById('request_data'));" />
+							</td>
+						</tr>
+					</table>
+				</div>
+			</form>
+		</td>
+		<td id="targetForTxt" valign="top" width="50%"> <!-- END OF THE LEFT COLUMN -->
+		</td>	
+</tr></table> <!-- END OF THE RIGHT COLUMN -->
+</div>
+<div>
+	<label>To get the data in exact location, please enter Lat - lon - alt:</label>
+	<textarea id="lat_refl" name="lat_refl" COLS="20" ROWS="1" >-78.122</textarea>
+	<textarea id="lon_refl" name="lon_refl" COLS="20" ROWS="1">90.856</textarea>
+	<input type="button" id="button_setExactPoint" value="Set point" onclick="javascript:setExactPoint_onclick(document.getElementById('lat_refl'),document.getElementById('lon_refl'));" />
+	<textarea id="exact_time_params" name="exact_time_params"></textarea>
+</div>
+<div id="canvas-id">
+	<table>
+		<tr>
+			<td width="500" height="500" >
+				<canvas id="interactiveEarth-canvas" style="border: none;" width="500" height="500"></canvas>
+			</td>
+		</tr>
+		<tr>
+			<td width="500" height="500">
+				<canvas id="plainGraphic-canvas" style="border: 2px navy;" width="800" height="300"></canvas>
+			</td>
+		</tr>
+		<tr>
+			<td id="Td2D">
+			</td>
+		</tr>
+	</table>
+</div>
