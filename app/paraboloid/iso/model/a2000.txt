@@ -1,0 +1,226 @@
+
+
+                                A2000
+
+                     DYNAMIC PARABOLOID MODEL OF
+                      THE EARTH'S MAGNETOSPHERE
+                      (March, 2000; June, 2002)
+
+
+                          P R E F A C E
+
+Dynamic paraboloid model (A2000) allows to calculate the variations of
+magnetic field of each magnetospheric large scale current systems by
+empirical data during quite and disturbed periods. A simple submodels
+are used to calculate the A2000 paraboloid model input parameters via
+empirical data. The possibilities to "switch on" and "switch off"
+separate sources of the magnetospheric magnetic field are not provided
+in this version. The IMF penetrated into the magnetosphere as well as
+field-aligned currents magnetic field are included  in the total
+magnetospheric magnetic field.
+
+
+
+1. PROGRAM USAGE
+      call a2000(ut,iy,mo,id,ro,v,bimf,dst,al,x,bm,bb)
+ INPUT PARAMETERS: x0(3) is a point where the magnetic field is being
+                    calculated, in GSM coordinates, Re;
+                   UT - Universal Time (hours);
+                   iy - year;
+                   mo - month;
+                   id - day in month;
+                   ro, V - solar wind density and velocity, cm^-3, km/s.
+                   bimf - IMF's GSM-components, nT.
+                   dst - Dst index, nT;
+                   AL  - al index, nT. 
+
+ OUTPUT PARAMETERS: bm(3) - magnetic field components
+                      in GSM coordinates, nT;
+		    bb(7,3) - contributions of magnetospheric current 
+		              systems to bm(3).
+	bb(1,i) - geomagnetic dipole magnetic field;
+	bb(2,i) - ring current magnetic field;
+	bb(3,i) - geomagnetic tail currents magnetic field;
+	bb(4,i) - magnetic field of CF currents shielding dipole;
+	bb(5,i) - magnetic field of CF currents shielding ring current;
+	bb(6,i) - magnetic field of Region 1 FAC;     
+	bb(7,i) - IMF penetrated into the magnetosphere.     
+	
+2. DESCRIPTION OF SOME PROGRAMS
+
+   There are a set of the model input parameters controlling the  large
+   scale current systems geometry and intensities. They may be defined
+   by empirical data via submodels (subroutine SUBMOD). Subroutine 
+   a_field allows to calculate the magnetic field in the magnetosphere
+   by the model input parameters.
+
+2.1. a_field
+ Calculation of the magnetic field in the magnetosphere
+ by the model input parameters.
+
+ CALL: call a_field(x0,par,bm,bb)
+ INPUT PARAMETERS: x0(3) is a point where the magnetic field is being
+                    calculated, in GSM coordinates, Re;
+                   par(1-10) - model input parameters:
+                    par(1) - geomagnetic dipole tilt angle, degrees;
+                    par(2) - dipole magnetic field at equator, nT; 
+		    par(3) - magnetic flux through the tail lobes, Wb;
+                    par(4) - maximum ring current intensity, nT;
+	            par(5) - the total current of Region 1 FAC, MA;
+                    par(6) - magnetopause stand-off distance, Re;
+                    par(7) - distance to the inner edge of geotail
+                             current sheet, Re;
+                    par(8-10) - IMF components in GSM coord., nT.
+
+ OUTPUT PARAMETERS: magnetic field components at the point x0(3)
+                      in GSM coordinates: 
+		    bm(3), bb(7,3) are the same as in a2000.
+
+ WARNING: Because of the paraboloid coordinates singularity, avoid
+          the magnetic field calculations at the Ox axis.
+
+2.2. TRANS
+ Program calculating the geomagnetic dipole tilt angle and
+ the transition matrix between GSM and geographic coordinates. 
+
+ CALL: call trans(UT,iday,PSI,BD)
+ INPUT PARAMETERS:  UT   is the universal time, hours;
+                    iday is the number of day in the year;
+ OUTPUT PARAMETERS: PSI is the geomagnetic dipole tilt angle, degrees;
+                    BD is the geomagnetic dipole magnetic field at the
+		    Earth's equator.
+ NOTE: The transition matrix G2GSM(3,3) is stored in 
+       CONNON BLOCK /TRAN/.
+
+2.3. IDD
+ Calculation of the day number in a year
+
+ CALL: x=IDD(iy,mo,id), function
+ INPUT PARAMETERS: year (IY), month (MO), day in the month (ID) 
+ OUTPUT PARAMETER: day number in a year.
+
+2.4. PERE2 
+ Transition of vector A into vector B by T for k>0 (B=T*A)      
+ or T^{-1} matices for k<=0 (B=T^{-1}*A)      
+
+ CALL: pere2(A,B,T,k)
+ 
+2.5. SUBMOD(ut,iy,mo,id,ro,v,bimf,dst,al,par)
+ Calculation of the paraboloid model input parameters by empirical data
+
+ CALL: call submod(,par)
+ INPUT PARAMETERS:  Empirical data (ut,iy,mo,id,ro,v,bimf,dst,al)
+                    are described in Sec.1.
+ OUTPUT PARAMETERS: par(1-10) - model input parameters
+                    are described in Sec. 2.1.
+
+2.6. SMtoGSM
+ Calculates the transition matrix from SM coordinates to GSM ones.
+
+ CALL: call SMtoGSM(SM2GSM)
+ INPUT PARAMETERS:  CPSI,SPSI - Cos and Sin of the dipole tilt angle.
+ OUTPUT PARAMETERS: SM2GSM(3,3) - transition matrix from 
+                    SM coordinates to GSM one:
+                     VectGSM=(SM2GSM)*VectSM.
+
+2.7. PSTATUS
+ Determination of the parameters providing the model tuning
+ (Large-scale magnetospheric magnetic field sources switch on/off)
+
+ CALL: call PSTATUS(X1,X2,X3,X4,X5,X6,X7)
+ INPUT PARAMETERS: X1,X2,X3,X4,X5,X6,X7 - values of 
+                   current systems tuning parameters:
+      x1=0/1   dipole field on/off 
+      x2=0/1   RC field on/off 
+      x3=0/1   tail current field on/off
+      x4=0/1   dipole shielding field on/off
+      x5=0/1   RC shielding field IMF on/off 
+      x6=0/1   Region 1 FAC field on/off
+      x7=0/1   IMF on/off
+
+2.8. DIPGARM
+  Calculation of the first three Gaussian coefficients of internal
+  magnetic field for given year
+  year>=1900 
+  Last values are for 1995.
+  
+ CALL: call dipgarm(iyear, gauss)
+ INPUT PARAMETERS: iyear - year 
+ OUTPUT PARAMETERS: GAUSS(3) the first three Gaussian coefficients
+                    of internal magnetic field    
+
+3. MODEL LIMITATIONS and PECULARITIES
+
+ 1. Because of the paraboloid coordinates singularity, avoid
+    the magnetic field calculations at the Ox axis and magnetic field
+    line calculations on the y=0 plane.
+ 2. The magnetic fields of Region 2 field-aligned currents and partial 
+    ring current are not yet taken into account.
+ 3. Despite taking into account the IMF penetrated inside the
+    magnetsphere, the magnetosheath magnetic field is not
+    considered. 
+ 4. You can change submodels in A2000 to calculate input parameters
+    on your own manner.
+
+4. HOW TO CHANGE SUBMODELS?
+
+The magnetospheric model parameters are calculated from a set of data
+measured in the Earth's environment. The necessary set of data  should
+include data on the solar wind and IMF, as well as the values 
+characterizing a disturbed magnetosphere. The relationships between 
+the model parameters and experimental data are described by submodels.
+Calculation techniques for the model parameters are presented in the
+subroutine SUBMOD. The submodels presented enable calculation of the
+parameters of the  magnetospheric current systems and, consequently,
+the  magnetospheric dynamics with known parameters of the solar wind,
+the total energy of ring current particles, the polar oval dimensions
+and AL-index of auroral perturbation. 
+
+ 1. Take the subroutine SUBMOD. You can find the commented blocks
+    for all the model input parameters.
+ 2. Replace the needed block.
+ 3. Relace SUBMOD in the model with the new SUBMOD.
+ 4. ATTENTION: YOU CAN DO IT ONLY ON YOUR OWN RISK!
+
+5. FIXED BUGS and SMALL PROGRAM CORRECTIONS
+
+ 1. 19 June 2002. The error in Fortran codes arising during calculations in 
+    the near vicinity of OX axis was found and fixed.
+ 2. 27 June 2002. The default value for the ring current maximum location
+    was chosen to be equal to 4 Re.
+ 3. 8 July 2002. Inaccurate description of PAR(5) parameter was corrected
+    in program comments and in this file (a2000.txt) as well.
+     
+6. BIBLIOGRAPHY
+
+ 1. Alexeev I.I. Regular magnetic field in the Earth's magnetosphere //
+    Geom. and aeron. 1978. V.18. P.656.(in Russian).
+ 2. Alexeev I.I., Kalegaev V.V., Feldstein Ya. I. Modelling the magnetic
+    field in strongly excited magnetosphere //  Geom. and aeron. 1992.
+    V.32. P.8.(in Russian).
+ 3. Alexeev I. I., Belenkaya E. S., Kalegaev V. V., Feldstein Ya. I, Grafe
+    A.  Magnetic Storms and Magnetospheric Currents // J. Geophys. Res.
+    1996. V.101.  P.7737.
+ 4. Alexeev, I. I. and V. V. Kalegaev, Magnetic field and the plasma
+    flow structure near the magnetopause // J. Geophys. Res. 1995.
+    V. 100. P.19267.
+ 5. Alexeev I.I., Kalegaev V.V., Belenkaya E.S., Bobrovnikov S.Yu.,              
+     Feldstein Ya.I., Gromova L.I. //  J. Geophys. Res., 2001, V.106, 
+     No A11, P. 25,683-25,694. 
+     
+7. GENERAL INFORMATION
+
+ If you have some questions and comments on the dynamic paraboloid model 
+ or related software, please, address
+
+ I.I.Alexeev (Paraboloid model of the magnetosphere)
+       Tel.: (095) 939-1036, E-mail: alexeev@dec1.npi.msu.su
+
+ V.V.Kalegaev (Software support)
+       Tel.: (095) 939-1915, E-mail: klg@dec1.npi.msu.su
+
+ Address:
+   Institute of Nuclear Physics,
+   Moscow State University,
+   Moscow 119992, 
+   Russia
