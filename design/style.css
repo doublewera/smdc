@@ -1,0 +1,228 @@
+body {
+  font			: 12px arial;
+  color			: #000000;
+  background-color	: #ffffff;
+  margin-left	: 0pt;
+  margin-right	: 0pt;
+  margin-top	: 0pt;
+  margin-bottom	: 0pt
+}
+
+table.apev {
+	border-width: 1px;
+	border-spacing: 2px;
+	border-style: outset;
+	border-color: gray;
+	border-collapse: collapse;
+	background-color: white;
+}
+
+table.apev td {
+	border-width: 1px;
+	padding: 3px;
+	border-style: inset;
+	border-color: gray;
+	background-color: white;
+}
+
+.content {
+  font-size	: 10pt;
+  color		: #000000
+}
+
+.monitor {
+	background-color : #d9e5f2;
+	border			 : 1px solid;
+	border-color	 : #8080ff;
+}
+
+div.hiddenRadioGroup {
+	display: none;
+}
+
+a:link {
+ text-decoration 	: underline;
+ color			: blue;
+ background-color	: white
+}
+
+a:visited {
+ text-decoration	: underline;
+ color			: purple;
+ background-color	: white
+}
+
+a:hover {
+ text-decoration	: none
+}
+
+a:active {
+ text-decoration	: none;
+ color			: green
+}
+
+div[id="backLink"] {
+	text-decoration : underline ;
+	color						: blue ;
+	cursor					: pointer ;
+}
+
+td.separator, h3.separator, div.separator {
+ white-space: nowrap;
+ border-top: 1px solid #8080ff;
+ background-color: #d9e5f2;
+// margin: 0px 0px 0px 7px;
+ padding-top: 10px;
+ padding-bottom: 15px;
+ padding: 0px 0px 0px 0px;
+}
+
+ul.nobullet {
+ padding	: 0px;
+ margin		: 0px;
+ list-style-type: none;
+}
+
+ul.menu, ul.popup, ul.popupie6 {
+ padding	: 0px;
+ margin		: 0px;
+ border		: 0px;
+ list-style	: none
+}
+
+ul.menu {
+ height		: 10px
+}
+
+ul.popup {
+ position		: absolute;
+ visibility		: hidden;
+ margin-left	: 2px;
+ z-index		: 10500;
+ margin-top		: -1px
+}
+
+ul.popupie6 {
+ position		: absolute;
+ visibility		: hidden;
+ margin-left	: -20px;
+ z-index		: 10500;
+ margin-top		: 15px
+}
+
+iframe.iframeie6 {
+ position		: absolute;
+ display		: none;
+ margin-left	: -20px;
+ z-index		: 10;
+ margin-top		: 10px
+}
+
+li.popup {
+ border			: 1px solid black;
+ padding		: 0px;
+ padding-left		: 4px;
+ font-weight		: normal;
+ text-align		: left;
+ list-style		: none;
+ background		: #ffffff;
+ width			: 120px;
+ z-index		: 10500;
+ margin-top		: -4px;
+ line-height		: 1.5;
+ border-top		: 2px solid black
+}
+
+table.switch {
+ background		: #d9e5f2;
+ border			: 1px solid black
+}
+
+a.menu {
+        font-size       : 14px
+}
+
+li.menu, li.currentmenu {
+ float			: left;
+ background		: #d9e5f2;
+ margin			: 0px;
+ border			: 1px solid black;
+ padding		: 0px;
+ text-align		: left;
+ list-style		: none;
+ padding-left		: 4px
+}
+
+li.currentmenu {
+ border-bottom-style	: solid;
+ font-weight		: bold;
+ border-bottom-width	: 0px
+}
+
+a.menu, a.popup {
+ color				: black;
+ display			: block !important;
+ margin				: 0px;
+ border				: 0px;
+ padding			: 0px; 
+ margin-left		: -4px;
+ padding-left		: 5px;
+ padding-right		: 5px;
+ text-decoration	: none;
+ z-index			: 10500;
+ display			: inline-block
+}
+
+select {
+ z-index	: 2
+}
+
+a.menu:hover, a.popup:hover {
+ background			: #8080ff;
+ text-decoration		: none;
+ color				: white
+}
+
+a.menu:visited, a.popup:visited {
+ text-decoration	: none
+}
+
+a.history {
+ background-color	: #d9e5f2
+}
+
+td.flare {
+ background	: #ffffff;
+ cursor		: default
+}
+
+td.flareindex {
+ background	: #ffffff;
+ cursor		: pointer
+}
+
+td.flareindex:hover {
+ background	: #8080ff
+}
+
+td.corfpic {
+ background	: #ffffff;
+ cursor		: pointer;
+ border		: 1px solid #ffffff
+}
+
+td.corfpic:hover {
+ background	: #d9e5f2;
+ border		: 1px solid #8080ff
+}
+
+table.simpletable {
+  border:1px solid black;
+  border-collapse:collapse;
+}
+
+table.simpletable td {
+ border:1px solid black;
+ padding-left:5px;
+ padding-right:5px;
+}
