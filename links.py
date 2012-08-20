@@ -4,7 +4,7 @@ DOCROOT = "/home/www/smdc/"
 
 def links():
     str = ""
-    f = open(DOCROOT+'aux/directory.conf','r')
+    f = open(DOCROOT+'meta/directory.conf','r')
     x = f.readline()
     csect = 'default'
     sections = {}

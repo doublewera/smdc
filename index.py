@@ -165,7 +165,7 @@ def localize(req):
 
 def mkTitle(nav):
     try:
-        for i in open(DOCROOT + 'aux/header.txt'):
+        for i in open(DOCROOT + 'meta/header.txt'):
             i = i.split("::")
             if i[0] == nav:
                 return i[1].replace("\n", "") + ' - '
@@ -174,7 +174,7 @@ def mkTitle(nav):
         return ""
 
 def translate(text,language):
-    f = open(DOCROOT + 'aux/string.' + language)
+    f = open(DOCROOT + 'meta/string.' + language)
     tr = {}
     for line in f:
         if line.find('::') != -1:
