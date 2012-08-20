@@ -16,13 +16,17 @@ instruments = {
         ("p15",    ("proton",   1,   5,   "MeV", 1, "")),      # MKL
         ("p142",   ("proton",   2,  14,   "MeV", 1, "")),      # MKL
         ("p265",   ("proton",  26,  50,   "MeV", 1, "")),      # MKL
-        ("p509",   ("proton",  50,  90,   "MeV", 1, "")),      # MKL
-        ("p5090",  ("proton",  50,  90,   "MeV", 1, "")),      # MKL
+
+        ("p509",   ("proton",  50,  90,   "MeV", 1, "")),      # MKL ==
+        ("p5090",  ("proton",  50,  90,   "MeV", 1, "")),      # MKL ==
+
         ("p200300",("proton", 200, 300,   "MeV", 1, "")),      # MKL
+
         ("g513",   ("photon",   0.5, 1.3, "MeV", 1, "gamma")), # SONG
         ("g47",    ("photon",   4,   7,   "MeV", 1, "gamma")), # SONG
         ("g715",   ("photon",   7,  15,   "MeV", 1, "gamma")), # SONG
         ("g60100", ("photon",  60, 100,   "MeV", 1, "gamma")), # SONG
+
         ("x05015", ("photon", 50,  150,   "KeV", 1, "x-ray")), # SKL
         ("x1505",  ("photon", 150, 500,   "KeV", 1, "x-ray")), # SKL
         ("err5",   ("", None, None, "", 1, 'Error code', 1))
