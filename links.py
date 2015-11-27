@@ -49,7 +49,8 @@ def links():
                 str+=','
             str+="'"+re.sub('\s','_',x)+"'"
         str+=");\n //--> \n</script>"    
-        str+='</td></tr><tr><td colspan="2"><table><tr><td width="15%" valign="top">'
+#        str+='</td></tr><tr><td colspan="2">'
+        str += '<table><tr><td width="15%" valign="top">'
         str+='[<a id="all_caller" href="javascript:switchdiv(\'all\')">All links</a>]'
         for x in sections.keys():
             str+=' [<a id="'+re.sub('\s','_',x)+'_caller" href="javascript:switchdiv(\''+re.sub('\s','_',x)+'\')">'+re.sub('\s',' ',x)+'</a>]'
