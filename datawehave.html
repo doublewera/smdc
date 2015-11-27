@@ -1,0 +1,45 @@
+<table class="simpletable" style="margin:16px">
+<thead>
+<script type="text/javascript">
+
+function updateMaxAvailableTableShown() {
+//    alert('MaxAvailableTable is updated');
+//        dataType:'json',
+    $.ajax({
+        url     :'http://213.131.1.8/smdc/structure.py/getMaxDTofAvailableData',
+        dataType:'html',
+        timeout : 5000,
+        success : function(jsondata) {
+                     $('#maxDTofDataAvlbl').html(jsondata);
+                  },
+        error   : function() {
+                     $('#maxDTofDataAvlbl').html('<!-- ERROR -->');
+                  }
+    });
+/* Max Available Table will be updated minutely */
+    setTimeout(updateMaxAvailableTableShown, 60*1000);
+};
+
+updateMaxAvailableTableShown();
+
+</script>
+<tr>
+ <td widtd="70px">
+  <b>SOURCE</b>
+ </td>
+ <td>
+  <b>SUBSOURCE</b>
+ </td>
+ <td>
+  <b>ORACLE</b>
+ </td>
+ <!-- td>
+  <b>MYSQL</b>
+ </td>
+ <td>
+  <b>FTP</b>
+ </td -->
+</tr>
+</thead>
+<tbody id="maxDTofDataAvlbl"></tbody>
+</table>
