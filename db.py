@@ -47,7 +47,7 @@ class Satellitedb:
             # These are supported now. Empty list is no restriction, i.e. "any instrument", for example
             "uid" : None, # None => SELECT Public only
             "satellites" : [], # sysnames, like "meteor-m"
-            "instrumens" : [],
+            "instruments" : [],
             "channels" : [], # names. For example, you can specify "skl" and I hope, more than one satellite will produce you some data ;)
             "particles" : [], #[("parttype", minEnergy, maxEnergy), ...]
             "dt_record" : [(today.strftime(dtFormat), tonight.strftime(dtFormat))],
@@ -166,7 +166,7 @@ class Satellitedb:
     def getSatellist(self):
         self.__conn = MySQLdb.connect(host = self.__dbh, user = self.__dbu, passwd = self.__dbp, db = self.__dbn)
         self.__cursor = self.__conn.cursor()
-        self.__cursor.execute("select id from satellite")
+        self.__cursor.execute("select id from satellite order by id")
         satlist = self.__cursor.fetchall()
         self.__cursor.close()
         self.__conn.close()
@@ -193,7 +193,7 @@ class Satellitedb:
 #            return extradata
 #            return str((maxdt, requests, sattabreq))
             extradata.append(maxdt)
-        sqlRequest = "select %s from satellite where id=%s" % (silos, satid)
+        sqlRequest = "select %s from satellite where id=%s order by id" % (silos, satid)
         satinfo = self.__getDataFromMySQL(sqlRequest)[0]
         return list(satinfo) + extradata # see the table for the details. satinfo[0] is the noradid if known
 
@@ -215,19 +215,19 @@ class Satellitedb:
         if nameMax == None:
             nameMax = nameMin
         result = ""
-        for i in intervals:
+        for i in intervals: # [(i01, i02), (i11, i12), (i21, i22), (....)]
             if len(i) == 0 or (len(i) == 1 and i[0] == None) or (len(i) == 2 and i[0] == None and i[1] == None):
                 continue
-            if len(i) == 1 or i[0] == i[1]:
+            if len(i) == 1 or i[0] == i[1]: #[(elem,)]
                 result += " or %s=%s " % (nameMin, i[0])
             else:
-                if i[0] == None:
+                if i[0] == None:            #[(None, max)]
                     result += " or %s<=%s " % (nameMax, str(i[1]))
-                elif i[1] == None:
+                elif i[1] == None:          #[(min, None)]
                     result += " or %s>=%s " % (nameMin, str(i[0]))
-                elif i[0] > i[1]:
+                elif i[0] > i[1]:           #[(max, min)] - INVERSE == EXCLUDE!!
                     result += " or (%s<=%s or %s>=%s) " % (nameMin, str(i[1]), nameMax, str(i[0]))
-                else:
+                else:                       #[(min, max)]
                     result += " or (%s>=%s and %s<=%s) " % (nameMin, str(i[0]), nameMax, str(i[1]))
         result = result[4:] # delete first "OR"
         if result == "":
@@ -245,7 +245,7 @@ class Satellitedb:
 
     def getChannels(self, message):# [] EMPTY => SELECT ALL
         sqlRequest = """select satellite.sysname, satinstrument.name, channel.name, 
-            unit, geomfactor, comment, particle.name, minEnergy, maxEnergy, channel.idSatellite, idInstrument, channel.id 
+            unit, geomfactor, comment, particle.name, minEnergy, maxEnergy, energyunit, channel.idSatellite, idInstrument, channel.id 
             from channel, satellite, particle, satinstrument"""
         joinRestriction = " where channel.idSatellite=satellite.id and idParticle=particle.id and idInstrument=satinstrument.id and satinstrument.satid=satellite.id"
         sqlRequest += joinRestriction
@@ -254,11 +254,11 @@ class Satellitedb:
             pass
         else:
             sqlRequest += " and isprivate=0"
-        for key in ["satellites", "instrumens", "channels", "particles"]:
+        for key in ["satellites", "instruments", "channels", "particles"]:
             if not message.has_key(key):
                 message[key] = [] # [] EMPTY => SELECT ALL, WITHOUT THIS FILTER
         sqlRequest += "  and (" + self.__createConditionFromSet(map(lambda elem : (elem,), message["satellites"]), "satellite.id")
-        sqlRequest += ") and (" + self.__createConditionFromSet(map(lambda elem : (elem,), message["instrumens"]), "satinstrument.name")
+        sqlRequest += ") and (" + self.__createConditionFromSet(map(lambda elem : (elem,), message["instruments"]), "satinstrument.name")
         sqlRequest += ") and (" + self.__createConditionFromSet(map(lambda elem : (elem,), message["channels"]), "channel.name")
         sqlRequest += ") and (" + self.__createParticleSelect(message["particles"]) + ")"
         # (part, min, max); You can specify the same particle type more than once in different energy intervals
@@ -341,13 +341,17 @@ class Satellitedb:
         result = {}
         minE = maxE = geomfactor = isprivate = 0
         { "satName_instrName" : ( # COMMENT
-                "channame", (("parttype", minE, maxE), ("anotherPart", None, maxE), "Unit", geomfactor, "comment", isprivate) # TODO: order of channels by channel id and quickly!
+                "channame", (("parttype", minE, maxE), ("anotherPart", None, maxE), "Energyunit", geomfactor, "unit", "comment", isprivate) # TODO: order of channels by channel id and quickly!
         )} # END OF COMMENT
-        #   0         1         2        3       4          5       6        7    8    9       10     11
-        #satName, instrName, chanName, unit, geomfactor, comment, ptclName, min, max, idsat, idinstr, id
+        #select satellite.sysname, satinstrument.name, channel.name, 
+        #    unit, geomfactor, comment, particle.name, minEnergy, maxEnergy, energyunit, channel.idSatellite, idInstrument, channel.id 
+        #    from channel, satellite, particle, satinstrument
+
+        #   0         1         2        3       4          5       6         7    8    9          10     11      12
+        #satName, instrName, chanName, unit, geomfactor, comment, ptclName, min, max, energyunit, idsat, idinstr, id
         for chan in rowsOfChannels:
             print ("PROCESSING", chan)
-            satId = chan[9]
+            satId = chan[10]
             instrId = chan[1]#0]
             id = chan[2] # one channel has more than one id!!
 #            tbl = satName + "_" + instrName
@@ -358,10 +362,10 @@ class Satellitedb:
                 result[satId]["instruments"][instrId] = {"name" : chan[1], "channels" : {}}
             if not result[satId]["instruments"][instrId]["channels"].has_key(id):
                 result[satId]["instruments"][instrId]["channels"][id] = {
-                    "unit" : chan[3],
+                    "energyunit" : chan[9],
                     "geomfactor" : chan[4],
                     "comment" : chan[5],
-                    "id" : str(chan[11]),
+                    "id" : str(chan[12]),
                     "particles" : []
                 }
 #            else:
@@ -369,7 +373,7 @@ class Satellitedb:
             result[satId]["instruments"][instrId]["channels"][id]["particles"].append(tuple(chan[6:9]))
         return result
         chanDescrObject = { # Playing the COMMENT role
-            "unit" : "MeV",
+            "energyunit" : "MeV",
             "geomfactor" : 0.87,
             "comment" : "Comment from database",
             "particles" : [("electron", 0.5, 1.2)]
@@ -444,7 +448,17 @@ class Satellitedb:
         channels = self.__createChannelsDescriptions(self.__convertToChannelHierarchy(self.getChannels(message)))
         orbittype, coordsys = self.getCoords(message)
         coordsys = self.__createCoordsDescriptions(coordsys)
-        form = ""
+#        form = '''<h3 class="separator">Output type</h3><span>
+#          <input type="radio" name="xoutput" value="numbers" checked="checked" />Table<br />
+#          <input type="radio" name="xoutput" value="graph" />Graphic (E,t)<br />
+#          <input type="radio" name="xoutput" value="plot2d" />Plot 2d (L,t)<br />
+#          <input type="radio" name="xoutput" value="file" />File 
+#          </span>'''
+        form = '''<h3 class="separator">Output type</h3><span>
+          <input type="radio" name="xoutput" value="numbers" checked="checked" />Table<br />
+          <input type="radio" name="xoutput" value="file" />File 
+          </span>'''
+
         for satid in channels:
             form += '<h3 class="separator">Data Channels</h3><ul class="nobullet" id="instruments%s">%s</ul>' % (
                 str(satid),
@@ -477,7 +491,7 @@ class Satellitedb:
         self.__conn.close()
         return result
 
-    def getFromDB(self, tbl, header, dtstart, dtend, databse="Oracle"):
+    def getFromDB(self, tbl, header, dtstart, dtend, database="Oracle"):
         request = "select "
         if database == "Oracle":
             if header != "*":
@@ -491,9 +505,9 @@ class Satellitedb:
             if header != "*":
                 header = ",".join(map(lambda h : '`%s`' % h, header))
             request += header
-            request += ' from `%s`' % tbl
-            request += ' where dt_record>="%s"' % str(dtstart)
-            request += ' and dt_record<="%s"' % str(dtend)
+            request += " from `%s`" % tbl
+            request += " where dt_record>='%s'" % str(dtstart)
+            request += " and dt_record<='%s'" % str(dtend)
             return self.__getDataFromMySQL(request)
 
     def __createRequests(self, restrictions, database="MySQL", extremsonly=False):
@@ -510,22 +524,23 @@ class Satellitedb:
             chans = restrictions["channels"]
         info = ()
         if len(chans) > 0:
-            request = '''select channel.id, sysname, satinstrument.name, channel.name, particle.name, minEnergy, maxEnergy, unit, comment
+            request = '''select channel.id, sysname, satinstrument.name, channel.name, particle.name, minEnergy, maxEnergy, energyunit, unit, comment
                from satellite, satinstrument, channel, particle
                where satellite.id=idSatellite and satinstrument.id=idInstrument and idParticle=particle.id
                and (%s)''' % " or ".join(map(
                     lambda id : "channel.id='%s'" % id,
                     chans))
             info = self.__getDataFromMySQL(request)
-        reqs = {} # reqs = {"tbl" : {"chan" : {"unit" : "", "comment" : "", "particles" : ""}}}
+        reqs = {} # reqs = {"tbl" : {"chan" : {"energyunit" : "", "unit" : "", "comment" : "", "particles" : ""}}}
         for inf in info: # CREATE TBL-CHANNEL association and channel descriptions
-            id, sat, instr, chan, part, minE, maxE, unit, comment = inf # geomfactor and orientation?
+            id, sat, instr, chan, part, minE, maxE, energyunit, unit, comment = inf # geomfactor and orientation?
             tbl = "%s_%s" % (sat, instr)
             if not reqs.has_key(tbl):
                 reqs[tbl] = {}
             if not reqs[tbl].has_key(id):
                 reqs[tbl][id] = { # channel name for tbl is unique because it is a name of the table column
                     "name" : chan,
+                    "energyunit" : energyunit,
                     "unit" : unit,
                     "comment" : comment,
                     "particles" : []
@@ -555,13 +570,18 @@ class Satellitedb:
             request += instrrestriction + orbittyperestriction
             info = self.__getDataFromMySQL(request)
             for id, sat, instr in info:
-                tbl = "%s_%s" % (sat, instr) # IN THE FUTURE THERE SHOULD BE ONLY "SAT_COORDS" TABLE!
+                tbl = "%s_%s" % (sat, instr)
+                # IN THE FUTURE THERE SHOULD BE ONLY "SAT_COORD" TABLE!
+                # 2015-11-11 Are we in the future now?
                 if not reqs.has_key(tbl) and instrrestriction != "":
                     reqs[tbl] = {}
-                if not coords.has_key(tbl):
-                    coords[tbl] = []
-                    for cs in coordsys[orbittype[id]]:
-                        coords[tbl] += cs[1]
+                coordstblname = "%s_%s" % (sat, "coord")
+                if not reqs.has_key(coordstblname):# and instrrestriction != "":
+                    reqs[coordstblname] = {}
+                if not coords.has_key(coordstblname):
+                    coords[coordstblname] = []
+                for cs in coordsys[orbittype[id]]:
+                    coords[coordstblname] += cs[1]
 
         # CREATE REQUEST TRIPLETS (CHANS + COORDS)
         requests = []
@@ -575,6 +595,8 @@ class Satellitedb:
             coordstbl = {}
             if coords.has_key(tbl):
                 coordstbl = coords[tbl]
+#            elif coords.has_key(tbl.split("_")[0] + "_coord"):
+#                coordstbl = coords[tbl.split("_")[0] + "_coord"]
             silos = map(lambda c : colNameWrapper % c, map(
                 lambda ch : ch[0], chans
             ) + map(
@@ -663,9 +685,20 @@ class Satellitedb:
         chanLen = 10 # symbols per channel
         nones = map(lambda i : None, range(chanCount))
         header = ""
+        hdr = ""
+        tblset = []
+        for newChans, all in data:
+            tblset += map(lambda nc : nc[0].split(".")[0], newChans)
+        printtblname = len(set(tblset)) > 1
+        # this is not a good idea. We can easily delete two these lines
+        if len(set(tblset)) == 2 and "_coord" in "".join(tblset):
+            printtblname = False
 #        for newChans, minmaxes, all in data:
         for newChans, all in data:
-            header += "\n".join(map(lambda nc : nc[0] + " : " + nc[1], newChans)) + "\n"
+            header += "\n".join(map(
+                lambda nc : nc[0] + " : " + nc[1] if printtblname else nc[0].split(".")[-1] + " : " + nc[1],
+                newChans)) + "\n"
+            hdr += " ".join(map(lambda nc : (nc[0].split(".")[-1]).rjust(chanLen), newChans)) + " "
 #            result += "\n".join(map(
 #                lambda row : row[0].strftime(Qlookdt) + " " + " ".join(map(
 #                    lambda elem : ("%.3f" % elem).rjust(chanLen),
@@ -676,7 +709,7 @@ class Satellitedb:
                 dt = row[0].strftime(Qlookdt)
                 if not result.has_key(dt):
                     result[dt] = nones[:]
-                for i in range(len(newChans) - offset):
+                for i in range(len(newChans)):# - offset):
 #                    if fluxes: # MULTIPLY TO G-FACTOR AND THE COS(DIRECTION_ANGLE) IN DB!!
                     result[dt][offset + i] = row[i+1]
             offset += len(newChans)
@@ -686,7 +719,7 @@ class Satellitedb:
 #                    row[1:]
 #                )), all
 #            )) + "\n"
-        return header + "\n" + "\n".join(map(
+        return header + "\nYYYY MM DD hh mm ss " + hdr + "\n" + "\n".join(map(
                 lambda dt : dt + " " + " ".join(map(
                     lambda elem : ("%.3f" % elem).rjust(chanLen) if elem != None else "-999e+99".rjust(chanLen),
                     result[dt]
@@ -803,7 +836,7 @@ class Satellitedb:
         # satInfo is a string containing python code. It must be PySatel compatible
         # channel table: chandescfields
         ###############
-        chandescfields = "name", "idSatellite", "idInstr", "isprivate", "geomfactor", "idParticle", "minEnergy", "maxEnergy", "unit", "comment"
+        chandescfields = "name", "idSatellite", "idInstr", "isprivate", "geomfactor", "idParticle", "minEnergy", "maxEnergy", "energyunit", "comment"
         satmodule = {}
         exec satInfo in satmodule
         satname = satmodule["desc"]()["name"]
@@ -825,7 +858,7 @@ class Satellitedb:
             instid = self.__cursor.fetchone()[0]
             for ch in satmodule["instruments"][i][1]:
                 chdata = self.channelinfo(ch)
-                chname, unit, geomfactor, comment, isprivate = chdata["name"], chdata["unit"], chdata["geomfactor"], chdata["comment"], chdata["isprivate"]
+                chname, energyunit, geomfactor, comment, isprivate = chdata["name"], chdata["energyunit"], chdata["geomfactor"], chdata["comment"], chdata["isprivate"]
                 for p in chdata["particles"]:
                     if p[0] != "":
                         self.__cursor.execute("select id from particle where name='%s';" % p[0])
@@ -842,15 +875,15 @@ class Satellitedb:
                     max = p[2]
                     request = """insert into channel(
                                     name,idSatellite,idInstrument,isprivate,geomfactor,idParticle,
-                                    minEnergy,maxEnergy,unit,comment) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
+                                    minEnergy,maxEnergy,energyunit,comment) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
                     try:
                         self.__cursor.execute(request, 
-                            (chname, satid, instid, int(isprivate), geomfactor, parttype, min, max, unit, comment)
+                            (chname, satid, instid, int(isprivate), geomfactor, parttype, min, max, energyunit, comment)
                         )
                         print (chname, p, "added")
                     except:
                         print (request, 
-                            (chname, satid, instid, int(isprivate), geomfactor, parttype, min, max, unit, comment)
+                            (chname, satid, instid, int(isprivate), geomfactor, parttype, min, max, energyunit, comment)
                         )
             print (i, "added successfully")
         self.__cursor.close()
@@ -865,7 +898,7 @@ class Satellitedb:
     def addNewSatellite(self, satInfo): # TODO: add returns with errors
         # satInfo is a string containing python code. It must be PySatel compatible
         # channel table: chandescfields
-        chandescfields = "name", "idSatellite", "idInstr", "isprivate", "geomfactor", "idParticle", "minEnergy", "maxEnergy", "unit", "comment"
+        chandescfields = "name", "idSatellite", "idInstr", "isprivate", "geomfactor", "idParticle", "minEnergy", "maxEnergy", "energyunit", "comment"
         satmodule = {}
         exec satInfo in satmodule
         satname = satmodule["desc"]()["name"]
@@ -885,8 +918,8 @@ class Satellitedb:
                 print ("Cannot insert instrument", i, "satid =", satid)
             self.__cursor.execute("select id from satinstrument where name='%s' and satid='%s';" % (i, satid))
             instid = self.__cursor.fetchone()[0]
-#            for ch in satmodule["instruments"][i][1]:
-            for ch in satmodule["instruments"][i]["channels"]:
+            for ch in satmodule["instruments"][i][1]:
+#            for ch in satmodule["instruments"][i]["channels"]:
                 chdata = self.channelinfo(ch)
                 self.__cursor.execute("select max(id) from channel")
                 maxid = self.__cursor.fetchone();
@@ -908,8 +941,11 @@ class Satellitedb:
                         parttype = 0
                     request = "insert into channel(id,idSatellite,idInstrument,idParticle,minEnergy,maxEnergy"
                     placheHolders = "%s,%s,%s,%s,%s,%s"
+                    if len(p) < 3:
+                        print p,maxid+1, satid, instid, parttype, i, ch
+                        1/0
                     reqvals = maxid+1, satid, instid, parttype, p[1], p[2]
-                    for desc in ["name", "geomfactor", "comment", "isprivate", "minVal", "maxVal", "unit", "islog"]:
+                    for desc in ["name", "geomfactor", "comment", "isprivate", "minVal", "maxVal", "energyunit", "islog"]:
                         if chdata.has_key(desc):
                             request += "," + desc
                             placheHolders += ",%s"
@@ -973,7 +1009,7 @@ class Satellitedb:
         result = {
             "name" : chname,
             "particles" : particles,
-            "unit" : dat,
+            "energyunit" : dat,
         }
         for var in ["geomfactor", "comment", "isprivate", "minVal", "maxVal", "islog"]:
             if len(chdata) == 0:
@@ -992,8 +1028,11 @@ class Satellitedb:
             elif p[2] == None:
                 result += " > " + goodPrecision(p[1])
             else:
-                result += " %s - %s" % (goodPrecision(p[1]), goodPrecision(p[2]))
-            result += " " + chanInfo["unit"] + ", "
+                if p[1] == p[2]:
+                    result += " %s" % goodPrecision(p[1])
+                else:
+                    result += " %s - %s" % (goodPrecision(p[1]), goodPrecision(p[2]))
+            result += " " + chanInfo["energyunit"] + ", "
         if chanInfo["comment"].strip() == "":
             result = result[:-2]
         elif result.replace(",", '').strip() == "":
@@ -1073,7 +1112,11 @@ def getData(req):
     sdb = Satellitedb()
     sdb.main()
 #    return "<pre>%s</pre>" % str(sdb.getData(msg, "Oracle")).replace("datetime.datetime", "\n")
-    return "<pre>%s</pre>" % sdb.formatData(sdb.getData(msg, "Oracle"), chanCount)
+    dtbefore = datetime.now()
+    result = sdb.formatData(sdb.getData(msg, "Oracle"), chanCount)
+    tddb = datetime.now() - dtbefore
+    return "<pre>Time spent = %s,</pre><pre>%s</pre>" % (str(tddb), result)
+#sdb.formatData(sdb.getData(msg, "Oracle"), chanCount)
 
 
 def index(req):
