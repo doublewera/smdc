@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from math import sin, cos, atan, pow, pi, radians, degrees, log10
+from math import sin, cos, atan, pow, pi, radians, degrees, log10, fabs
 from datetime import datetime, timedelta
 from operator import indexOf
 
@@ -67,6 +67,8 @@ def goodPrecisionFloToStr(floatNumber):
     resA, resB = str(floatNumber), "0"
     if "." in resA:
         resA, resB = resA.split(".")
+    if fabs(floatNumber) < 0.1 or fabs(floatNumber) > 999:
+        return "%.1E" % floatNumber
     if "0" in resB:
         T0 = indexOf(resB, "0")
     else:
@@ -221,3 +223,19 @@ def sss(Min, Max):
     if type(Min) == datetime:
         return sssDt(Min, Max)
     return sssFloat(Min, Max)
+
+if __name__ == "__main__" :
+    print goodPrecisionFloToStr(-0.6)
+    print goodPrecisionFloToStr(0.6)
+    print goodPrecisionFloToStr(-0.06)
+    print goodPrecisionFloToStr(0.06)
+    print goodPrecisionFloToStr(-0.006)
+    print goodPrecisionFloToStr(0.006)
+    print goodPrecisionFloToStr(-0.0006)
+    print goodPrecisionFloToStr(0.0006)
+    print goodPrecisionFloToStr(6.0006)
+    print goodPrecisionFloToStr(-7.0006)
+    print goodPrecisionFloToStr(60.0006)
+    print goodPrecisionFloToStr(-70.0006)
+    print goodPrecisionFloToStr(600.0006)
+    print goodPrecisionFloToStr(-700.0006)
